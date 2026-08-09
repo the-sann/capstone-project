@@ -1,0 +1,5 @@
+09-aug-2026
+    1. choosing project name call "clinic-system"
+    2. set up the project & push to github
+    
+    using laravel starter kit with react inertia
