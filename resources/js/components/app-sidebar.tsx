@@ -1,5 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, User, User2 } from 'lucide-react';
+import {
+    BookOpen,
+    CarTaxiFrontIcon,
+    FolderGit2,
+    LayoutGrid,
+    User,
+    User2,
+    UserCircle2,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,6 +23,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
+import dentists from '@/routes/dentists';
 
 const mainNavItems: NavItem[] = [
     {
@@ -23,24 +32,23 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Dentist',
+        href: dentists.index(),
+        icon: UserCircle2,
+    },
+    {
         title: 'Patients',
         href: dashboard(),
         icon: User2,
     },
+    {
+        title: 'Materials',
+        href: dashboard(),
+        icon: CarTaxiFrontIcon,
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     return (
