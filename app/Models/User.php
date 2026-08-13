@@ -48,8 +48,4 @@ class User extends Authenticatable implements PasskeyUser
             'status' => 'boolean'
         ];
     }
-    public function dentist()
-    {
-        return $this->hasOne(Dentist::class);
-    }
 }

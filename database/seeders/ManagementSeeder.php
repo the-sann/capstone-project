@@ -21,23 +21,5 @@ class ManagementSeeder extends Seeder
             'is_dentist' => false,
             'status' => true,
         ]);
-
-        User::create([
-            'name' => 'Dr. Lim Daro',
-            'email' => 'doctor@clinic.test',
-            'password' => 'doctor123',
-            'user_type' => 'doctor',
-            'is_dentist' => true,
-            'status' => true,
-        ]);
-
-        User::create([
-            'name' => 'Cashier',
-            'email' => 'cashier@clinic.test',
-            'password' => 'cashier123',
-            'user_type' => 'cashier',
-            'is_dentist' => false,
-            'status' => true,
-        ]);
     }
 }

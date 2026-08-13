@@ -13,12 +13,7 @@ return new class extends Migration
     {
         Schema::create('dentists', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('user_id')
-                ->unique()
-                ->constrained('users')
-                ->cascadeOnDelete();
-
+            $table->string('name');
             $table->unsignedInteger('year_experienced')->default(0);
             $table->text('skill')->nullable();
             $table->boolean('status')->default(true);

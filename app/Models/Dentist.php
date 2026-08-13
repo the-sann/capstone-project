@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Dentist extends Model
 {
     protected $fillable = [
-        'user_id',
+        'name',
         'year_experienced',
         'skill',
         'status',
@@ -19,10 +19,5 @@ class Dentist extends Model
             'status' => 'boolean',
             'year_experienced' => 'integer',
         ];
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }

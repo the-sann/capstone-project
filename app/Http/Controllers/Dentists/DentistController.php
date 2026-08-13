@@ -3,23 +3,26 @@
 namespace App\Http\Controllers\Dentists;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DentistStoreRequest;
+use App\Http\Requests\DentistUpdateRequest;
 use App\Models\Dentist;
-use Illuminate\Http\Request;
-use Inertia\Response;
+use App\Models\User;
+
 
 class DentistController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index()
     {
-        $dentists = Dentist::with('user')
-            ->latest()
-            ->get();
-        return inertia('dentists/index', [
-            'dentists' => $dentists,
-        ]);
+        $dentist = Dentist::all();
+        return inertia(
+            'dentists/index',
+            [
+                'dentists' => $dentist
+            ]
+        );
     }
 
     /**
@@ -27,15 +30,18 @@ class DentistController extends Controller
      */
     public function create()
     {
-        //
+
+
+        return inertia('dentists/create', []);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(DentistStoreRequest $request)
     {
-        //
+        Dentist::create($request->validated());
+        return redirect()->route('dentists.index')->with('success', 'Dentist created successfully');
     }
 
     /**
@@ -57,16 +63,18 @@ class DentistController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(DentistUpdateRequest $request, Dentist $dentist)
     {
-        //
+        $dentist->update($request->validated());
+        return redirect()->route('dentists.index')->with('success', 'Dentist Updated Successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Dentist $dentist)
     {
-        //
+        $dentist->delete();
+        return redirect()->route('dentists.index')->with('success', 'Dentist Deleted Successfully');
     }
 }
