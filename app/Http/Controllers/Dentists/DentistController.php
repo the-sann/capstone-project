@@ -16,11 +16,11 @@ class DentistController extends Controller
      */
     public function index()
     {
-        $dentist = Dentist::all();
+        $dentists = Dentist::all();
         return inertia(
             'dentists/index',
             [
-                'dentists' => $dentist
+                'dentists' => $dentists
             ]
         );
     }
