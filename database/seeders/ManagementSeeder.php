@@ -17,9 +17,6 @@ class ManagementSeeder extends Seeder
             'name' => 'System Admin',
             'email' => 'admin@clinic.test',
             'password' => 'admin123',
-            'user_type' => 'admin',
-            'is_dentist' => false,
-            'status' => true,
         ]);
     }
 }

@@ -17,11 +17,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            // MY EXTEND
-            $table->string('user_type')->default('receptionist');
-            $table->boolean('is_dentist')->default(false);
-            $table->boolean('status')->default(true);
-            $table->string('profile_image')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

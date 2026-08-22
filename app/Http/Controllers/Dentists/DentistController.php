@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DentistStoreRequest;
 use App\Http\Requests\DentistUpdateRequest;
 use App\Models\Dentist;
-use App\Models\User;
 
 
 class DentistController extends Controller
@@ -32,7 +31,10 @@ class DentistController extends Controller
     {
 
 
-        return inertia('dentists/create', []);
+        return inertia(
+            'dentists/create',
+            []
+        );
     }
 
     /**
@@ -40,7 +42,12 @@ class DentistController extends Controller
      */
     public function store(DentistStoreRequest $request)
     {
-        Dentist::create($request->validated());
+
+        $data = $request->validated();
+        if ($request->hasFile('profile_image')) {
+            $data['profile_image'] = $request->file('profile_image')->store('dentists', 'public');
+        }
+        Dentist::create($data);
         return redirect()->route('dentists.index')->with('success', 'Dentist created successfully');
     }
 
@@ -55,9 +62,14 @@ class DentistController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Dentist $dentist)
     {
-        //
+        return inertia(
+            'dentists/edit',
+            [
+                'dentist' => $dentist
+            ]
+        );
     }
 
     /**

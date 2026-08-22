@@ -11,12 +11,16 @@ class Dentist extends Model
         'year_experienced',
         'skill',
         'status',
+        'profile_image',
+        'user_type',
+        'is_dentist'
     ];
 
     protected function casts(): array
     {
         return [
             'status' => 'boolean',
+            'is_dentist' => 'boolean',
             'year_experienced' => 'integer',
         ];
     }

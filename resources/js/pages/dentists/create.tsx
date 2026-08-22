@@ -12,28 +12,25 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-import {
-    Field,
-    FieldDescription,
-    FieldError,
-    FieldGroup,
-    FieldLabel,
-} from '@/components/ui/field';
-
-import { Input } from '@/components/ui/input';
+import DentistForm from './dentist-form';
 
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, errors, processing } = useForm({
         name: '',
         year_experienced: '',
         skill: '',
         status: true,
+        profile_image: null as File | null,
+        is_dentist: true,
+        user_type: '',
     });
 
-    function submit(e: React.FormEvent) {
+    function submit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        post(dentists.store().url);
+        post(dentists.store().url, {
+            forceFormData: true,
+        });
     }
 
     return (
@@ -52,132 +49,13 @@ export default function Create() {
                         </CardDescription>
                     </CardHeader>
 
-                    <form onSubmit={submit}>
-                        <CardContent>
-                            <FieldGroup>
-                                {/* Name */}
-                                <Field>
-                                    <FieldLabel htmlFor="name">Name</FieldLabel>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        value={data.name}
-                                        onChange={(e) =>
-                                            setData('name', e.target.value)
-                                        }
-                                        placeholder="Dr. John Smith"
-                                        aria-invalid={!!errors.name}
-                                    />
-
-                                    {errors.name && (
-                                        <FieldError>{errors.name}</FieldError>
-                                    )}
-                                </Field>
-
-                                {/* Years Experienced */}
-                                <Field>
-                                    <FieldLabel htmlFor="year_experienced">
-                                        Years Experienced
-                                    </FieldLabel>
-
-                                    <Input
-                                        id="year_experienced"
-                                        name="year_experienced"
-                                        type="text"
-                                        min="0"
-                                        value={data.year_experienced}
-                                        onChange={(e) =>
-                                            setData(
-                                                'year_experienced',
-                                                e.target.value,
-                                            )
-                                        }
-                                        placeholder="5"
-                                        aria-invalid={!!errors.year_experienced}
-                                    />
-
-                                    <FieldDescription>
-                                        How many years of dental experience?
-                                    </FieldDescription>
-
-                                    {errors.year_experienced && (
-                                        <FieldError>
-                                            {errors.year_experienced}
-                                        </FieldError>
-                                    )}
-                                </Field>
-
-                                {/* Skill */}
-                                <Field>
-                                    <FieldLabel htmlFor="skill">
-                                        Skill
-                                    </FieldLabel>
-
-                                    <Input
-                                        id="skill"
-                                        name="skill"
-                                        value={data.skill}
-                                        onChange={(e) =>
-                                            setData('skill', e.target.value)
-                                        }
-                                        placeholder="Orthodontics"
-                                        aria-invalid={!!errors.skill}
-                                    />
-
-                                    {errors.skill && (
-                                        <FieldError>{errors.skill}</FieldError>
-                                    )}
-                                </Field>
-
-                                {/* Status */}
-                                <Field orientation="horizontal">
-                                    <input
-                                        id="status"
-                                        name="status"
-                                        type="checkbox"
-                                        checked={data.status}
-                                        onChange={(e) =>
-                                            setData('status', e.target.checked)
-                                        }
-                                    />
-
-                                    <FieldLabel
-                                        htmlFor="status"
-                                        className="font-normal"
-                                    >
-                                        Active
-                                    </FieldLabel>
-                                </Field>
-
-                                {errors.status && (
-                                    <FieldError>{errors.status}</FieldError>
-                                )}
-                            </FieldGroup>
-                        </CardContent>
-
-                        <CardFooter>
-                            <div className="flex w-full justify-end gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                        setData('name', '');
-                                        setData('year_experienced', '');
-                                        setData('skill', '');
-                                        setData('status', true);
-                                    }}
-                                >
-                                    Reset
-                                </Button>
-
-                                <Button type="submit" disabled={processing}>
-                                    {processing
-                                        ? 'Creating...'
-                                        : 'Create Dentist'}
-                                </Button>
-                            </div>
-                        </CardFooter>
-                    </form>
+                    <DentistForm
+                        processing={processing}
+                        data={data}
+                        setData={setData}
+                        onSubmit={submit}
+                        errors={errors}
+                    />
                 </Card>
             </div>
         </>

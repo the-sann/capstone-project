@@ -27,6 +27,9 @@ class DentistStoreRequest extends FormRequest
             'year_experienced' => ['required', 'integer', 'min:0'],
             'skill' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'user_type' => 'required|in:admin,dentist,cashier,receptionist',
+            'is_dentist' => 'required|boolean',
         ];
     }
 }

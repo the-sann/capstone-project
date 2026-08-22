@@ -14,6 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import dentists from '@/routes/dentists';
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -25,7 +26,21 @@ export const columns = columnHelper.columns([
     columnHelper.accessor('name', {
         header: 'Name',
     }),
-
+    columnHelper.display({
+        header: 'Image',
+        cell: ({ row }) => {
+            const image = row.original.profile_image;
+            return image ? (
+                <img
+                    src={`/storage/${image}`}
+                    alt={row.original.name}
+                    className="h-16 w-16 object-cover"
+                />
+            ) : (
+                <span className="text-sm text-muted-foreground">No image</span>
+            );
+        },
+    }),
     columnHelper.accessor('status', {
         header: 'Status',
     }),
@@ -48,12 +63,8 @@ export const columns = columnHelper.columns([
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Copy payment ID</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>
-                            View payment details
-                        </DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>View Details</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );

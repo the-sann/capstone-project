@@ -6,4 +6,5 @@ export type Dentist = {
     created_at: string;
     updated_at: string;
     status: boolean;
+    profile_image: string;
 };
