@@ -17,7 +17,6 @@ export default function Create() {
         skill: '',
         status: true,
         image: '',
-        is_dentist: true,
         user_type: '',
     });
 
@@ -61,8 +60,12 @@ export default function Create() {
 Create.layout = {
     breadcrumbs: [
         {
-            title: 'Dentist',
-            href: dentists.create(),
+            title: 'Dentists',
+            href: dentists.index(),
+        },
+        {
+            title: 'Create Dentist',
+            href: dentists.create().url,
         },
     ],
 };

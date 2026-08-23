@@ -28,7 +28,6 @@ class DentistUpdateRequest extends FormRequest
             'skill' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
             'image' => ['nullable', 'image', 'max:2048'],
-            'is_dentist' => ['required', 'boolean'],
             'user_type' => ['required', 'string', 'in:admin,dentist,cashier,receptionist'],
         ];
     }

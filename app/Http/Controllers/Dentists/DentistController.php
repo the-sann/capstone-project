@@ -18,7 +18,7 @@ class DentistController extends Controller
      */
     public function index()
     {
-        $dentists = Dentist::all();
+        $dentists = Dentist::latest()->paginate(5);
         return inertia(
             'dentists/index',
             [
@@ -50,7 +50,7 @@ class DentistController extends Controller
         if ($image) {
             $data['image_path'] = $image->store('dentists', 'public');
         }
-
+        $data['is_dentist'] = $data['user_type'] === 'dentist';
         Dentist::create($data);
 
         return redirect()
@@ -61,9 +61,11 @@ class DentistController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Dentist $dentist)
     {
-        //
+        return inertia('dentists/show', [
+            'dentist' => $dentist,
+        ]);
     }
 
     /**
@@ -90,7 +92,12 @@ class DentistController extends Controller
             }
             $data['image_path'] = $image->store('dentists', 'public');
         }
-        unset($data['image']);
+        unset($image);
+        if ($data['user_type'] === 'dentist') {
+            $data['is_dentist'] = true;
+        } else {
+            $data['is_dentist'] = false;
+        }
         $dentist->update($data);
         return to_route('dentists.index')
             ->with('success', "Dentist \"{$dentist->name}\" was updated.");

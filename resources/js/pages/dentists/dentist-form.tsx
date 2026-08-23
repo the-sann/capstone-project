@@ -34,7 +34,6 @@ interface DentistFormData {
     skill: string;
     status: boolean;
     image: File | string | null;
-    is_dentist: boolean;
     user_type: string;
 }
 
@@ -58,8 +57,6 @@ export default function DentistForm({
     onSubmit,
     dentist,
 }: DentistFormProps) {
-    console.log('Dentist:', dentist);
-    console.log('Image:', dentist?.image_path);
     return (
         <form onSubmit={onSubmit}>
             <CardContent>
@@ -75,7 +72,6 @@ export default function DentistForm({
                             placeholder="Dr. John Smith"
                             aria-invalid={!!errors.name}
                         />
-
                         {errors.name && <FieldError>{errors.name}</FieldError>}
                     </Field>
                     {/* user_type */}
@@ -84,9 +80,9 @@ export default function DentistForm({
 
                         <Select
                             value={data.user_type}
-                            onValueChange={(value) =>
-                                setData('user_type', value)
-                            }
+                            onValueChange={(value) => {
+                                setData('user_type', value);
+                            }}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select user type" />
@@ -106,27 +102,7 @@ export default function DentistForm({
                             <FieldError>{errors.user_type}</FieldError>
                         )}
                     </Field>
-                    {/* is_dentist */}
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="is_dentist"
-                            checked={data.is_dentist}
-                            onCheckedChange={(checked) =>
-                                setData('is_dentist', checked)
-                            }
-                        />
 
-                        <FieldLabel
-                            htmlFor="is_dentist"
-                            className="font-normal"
-                        >
-                            Is Dentist
-                        </FieldLabel>
-                    </Field>
-
-                    {errors.is_dentist && (
-                        <FieldError>{errors.is_dentist}</FieldError>
-                    )}
                     {/* display image */}
                     {dentist?.image_path && (
                         <img
@@ -234,7 +210,6 @@ export default function DentistForm({
                             setData('status', true);
                             setData('user_type', '');
                             setData('image', null);
-                            setData('is_dentist', true);
                         }}
                     >
                         Reset

@@ -28,8 +28,7 @@ class DentistStoreRequest extends FormRequest
             'skill' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
             'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'user_type' => 'required|in:admin,dentist,cashier,receptionist',
-            'is_dentist' => 'required|boolean',
+            'user_type' => 'required|string|in:admin,dentist,cashier,receptionist',
         ];
     }
 }

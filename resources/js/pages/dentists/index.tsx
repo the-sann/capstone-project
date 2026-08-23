@@ -2,15 +2,31 @@ import { Head, Link, router } from '@inertiajs/react';
 import dentists from '@/routes/dentists';
 import type { Dentist } from '@/types/app/types';
 import { DataTable } from '@/components/ui/data-table';
-import { columns } from './table/column';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { columns } from './table/column';
+
+interface PaginatedDentists {
+    data: Dentist[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
 
 interface DentistProps {
-    dentists: Dentist[];
+    dentists: PaginatedDentists;
 }
-export default function Index({ dentists }: DentistProps) {
-    console.log('dentists', dentists);
+
+export default function Index({ dentists: dentistData }: DentistProps) {
+    const handleDelete = (id: number, name: string) => {
+        if (!confirm(`Are you sure you want to delete dentist ${name}?`)) {
+            return;
+        }
+
+        router.delete(dentists.destroy(id).url);
+    };
+
     return (
         <>
             <Head title="Dentist" />
@@ -23,7 +39,11 @@ export default function Index({ dentists }: DentistProps) {
                     </Button>
                 </Link>
 
-                <DataTable columns={columns} data={dentists} />
+                <DataTable
+                    columns={columns(handleDelete)}
+                    data={dentistData.data}
+                    pagination={dentistData}
+                />
             </div>
         </>
     );

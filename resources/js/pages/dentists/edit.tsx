@@ -33,11 +33,11 @@ export default function Edit({ dentist }: Props) {
             <Head title="Create Dentist" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <h1 className="text-2xl font-semibold">Create Dentist</h1>
+                <h1 className="text-2xl font-semibold">Update Dentist</h1>
 
                 <Card className="w-full sm:max-w-md">
                     <CardHeader>
-                        <CardTitle>Create Dentist</CardTitle>
+                        <CardTitle>Update</CardTitle>
 
                         <CardDescription>
                             Enter the dentist's information below.
@@ -57,3 +57,15 @@ export default function Edit({ dentist }: Props) {
         </>
     );
 }
+Edit.layout = {
+    breadcrumbs: [
+        {
+            title: 'Dentist',
+            href: dentists.index(),
+        },
+        {
+            title: 'Edit Dentist',
+            href: '#',
+        },
+    ],
+};

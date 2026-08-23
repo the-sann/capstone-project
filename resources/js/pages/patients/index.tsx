@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { columns } from './table/column';
 import { Patient } from '@/types/app/types';
+import patients from '@/routes/patients';
 
 interface PatientProps {
     patients: Patient[];
@@ -26,3 +27,11 @@ export default function Index({ patients }: PatientProps) {
         </>
     );
 }
+Index.layout = {
+    breadcrumbs: [
+        {
+            title: 'Patients',
+            href: patients.index(),
+        },
+    ],
+};

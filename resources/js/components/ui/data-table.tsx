@@ -12,16 +12,33 @@ import {
 } from '@/components/ui/table';
 
 import { features, type DataTableFeatures } from '../../pages/dentists/table/data-table-features';
-import { Button } from "@/components/ui/button"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { PaginationIconsOnly } from '../app/pagination';
 
 interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[];
     data: TData[];
+
+    pagination?: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
 }
 
 export function DataTable<TData extends RowData>({
     columns,
     data,
+    pagination
 }: DataTableProps<TData>) {
     const table = useTable({
         features,
@@ -29,7 +46,7 @@ export function DataTable<TData extends RowData>({
         columns,
     });
 
-    return (
+    return (<>
         <div className="overflow-hidden rounded-md border">
             <Table>
                 <TableHeader>
@@ -73,8 +90,14 @@ export function DataTable<TData extends RowData>({
                     )}
                 </TableBody>
             </Table>
-             <div className="flex items-center justify-end space-x-2 py-4">
-      </div>
+             
         </div>
+      {pagination && (
+    <PaginationIconsOnly
+        currentPage={pagination.current_page}
+        lastPage={pagination.last_page}
+    />
+)}
+        </>
     );
 }
