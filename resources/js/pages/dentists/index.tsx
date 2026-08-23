@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import dentists from '@/routes/dentists';
-import type { Dentist } from '@/types/app/dentists/dentist';
+import type { Dentist } from '@/types/app/types';
 import { DataTable } from '@/components/ui/data-table';
 import { columns } from './table/column';
 import { Button } from '@/components/ui/button';

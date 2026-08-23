@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dentists', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('profile_image')->nullable();
+            $table->string('image_path')->nullable();
             $table->unsignedInteger('year_experienced')->default(0);
             $table->string('user_type')->default('receptionist');
             $table->boolean('is_dentist')->default(false);

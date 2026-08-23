@@ -1,13 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import dentists from '@/routes/dentists';
 
-import { Button } from '@/components/ui/button';
-
 import {
     Card,
-    CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -20,7 +16,7 @@ export default function Create() {
         year_experienced: '',
         skill: '',
         status: true,
-        profile_image: null as File | null,
+        image: '',
         is_dentist: true,
         user_type: '',
     });

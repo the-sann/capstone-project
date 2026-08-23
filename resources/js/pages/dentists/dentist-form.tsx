@@ -26,14 +26,14 @@ import {
 } from '@/components/ui/field';
 
 import { Input } from '@/components/ui/input';
-import { Dentist } from '@/types/app/dentists/dentist';
+import { Dentist } from '@/types/app/types';
 
 interface DentistFormData {
     name: string;
     year_experienced: string;
     skill: string;
     status: boolean;
-    profile_image: File | null;
+    image: File | string | null;
     is_dentist: boolean;
     user_type: string;
 }
@@ -58,6 +58,8 @@ export default function DentistForm({
     onSubmit,
     dentist,
 }: DentistFormProps) {
+    console.log('Dentist:', dentist);
+    console.log('Image:', dentist?.image_path);
     return (
         <form onSubmit={onSubmit}>
             <CardContent>
@@ -125,27 +127,31 @@ export default function DentistForm({
                     {errors.is_dentist && (
                         <FieldError>{errors.is_dentist}</FieldError>
                     )}
+                    {/* display image */}
+                    {dentist?.image_path && (
+                        <img
+                            src={dentist.image_path}
+                            alt={dentist.name}
+                            className="w-64"
+                        />
+                    )}
                     {/* profile_image */}
                     <Field>
                         <FieldLabel htmlFor="profile_image">
                             Profile Image
                         </FieldLabel>
-
                         <Input
-                            id="profile_image"
+                            id="image"
                             type="file"
-                            name="profile_image"
+                            name="image"
                             accept="image/*"
                             onChange={(e) =>
-                                setData(
-                                    'profile_image',
-                                    e.target.files?.[0] ?? null,
-                                )
+                                setData('image', e.target.files?.[0] ?? null)
                             }
                         />
 
-                        {errors.profile_image && (
-                            <FieldError>{errors.profile_image}</FieldError>
+                        {errors.image && (
+                            <FieldError>{errors.image}</FieldError>
                         )}
                     </Field>
 
@@ -227,7 +233,7 @@ export default function DentistForm({
                             setData('skill', '');
                             setData('status', true);
                             setData('user_type', '');
-                            setData('profile_image', null);
+                            setData('image', null);
                             setData('is_dentist', true);
                         }}
                     >
@@ -235,7 +241,13 @@ export default function DentistForm({
                     </Button>
 
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Creating...' : 'Create Dentist'}
+                        {processing
+                            ? dentist
+                                ? 'Updating...'
+                                : 'Creating...'
+                            : dentist
+                              ? 'Update Dentist'
+                              : 'Create Dentist'}
                     </Button>
                 </div>
             </CardFooter>

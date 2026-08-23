@@ -24,6 +24,7 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import dentists from '@/routes/dentists';
+import patients from '@/routes/patients';
 
 const mainNavItems: NavItem[] = [
     {
@@ -38,7 +39,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Patients',
-        href: dashboard(),
+        href: patients.index(),
         icon: User2,
     },
     {

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DentistStoreRequest extends FormRequest
+class PatientStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +24,10 @@ class DentistStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'year_experienced' => ['required', 'integer', 'min:0'],
-            'skill' => ['required', 'string', 'max:255'],
-            'status' => ['boolean'],
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'user_type' => 'required|in:admin,dentist,cashier,receptionist',
-            'is_dentist' => 'required|boolean',
+            'age' => ['required', 'integer', 'min:0', 'max:100'],
+            'gender' => 'required|string|max:20|in:male,female',
+            'phone' => ['required', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

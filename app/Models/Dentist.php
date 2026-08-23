@@ -11,7 +11,7 @@ class Dentist extends Model
         'year_experienced',
         'skill',
         'status',
-        'profile_image',
+        'image_path',
         'user_type',
         'is_dentist'
     ];

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Dentists;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DentistStoreRequest;
 use App\Http\Requests\DentistUpdateRequest;
+use App\Http\Resources\DentistResource;
 use App\Models\Dentist;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 
 class DentistController extends Controller
@@ -42,13 +45,17 @@ class DentistController extends Controller
      */
     public function store(DentistStoreRequest $request)
     {
-
         $data = $request->validated();
-        if ($request->hasFile('profile_image')) {
-            $data['profile_image'] = $request->file('profile_image')->store('dentists', 'public');
+        $image = $data['image'] ?? null;
+        if ($image) {
+            $data['image_path'] = $image->store('dentists', 'public');
         }
+
         Dentist::create($data);
-        return redirect()->route('dentists.index')->with('success', 'Dentist created successfully');
+
+        return redirect()
+            ->route('dentists.index')
+            ->with('success', 'Dentist created successfully');
     }
 
     /**
@@ -64,21 +71,29 @@ class DentistController extends Controller
      */
     public function edit(Dentist $dentist)
     {
-        return inertia(
-            'dentists/edit',
-            [
-                'dentist' => $dentist
-            ]
-        );
+        return inertia('dentists/edit', [
+            'dentist' => new DentistResource($dentist),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
+
     public function update(DentistUpdateRequest $request, Dentist $dentist)
     {
-        $dentist->update($request->validated());
-        return redirect()->route('dentists.index')->with('success', 'Dentist Updated Successfully');
+        $data = $request->validated();
+        $image = $data['image'] ?? null;
+        if ($image) {
+            if ($dentist->image_path) {
+                Storage::disk('public')->delete($dentist->image_path);
+            }
+            $data['image_path'] = $image->store('dentists', 'public');
+        }
+        unset($data['image']);
+        $dentist->update($data);
+        return to_route('dentists.index')
+            ->with('success', "Dentist \"{$dentist->name}\" was updated.");
     }
 
     /**
