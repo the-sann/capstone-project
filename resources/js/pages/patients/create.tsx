@@ -10,7 +10,7 @@ import patients from '@/routes/patients';
 import PatientForm from './patient-form';
 
 export default function Create() {
-    const { data, setData, post, errors, processing } = useForm({
+    const { data, setData, post, errors, processing, clearErrors } = useForm({
         name: '',
         patient_id: '',
         age: '',
@@ -48,6 +48,7 @@ export default function Create() {
                         data={data}
                         setData={setData}
                         onSubmit={submit}
+                        clearErrors={clearErrors}
                         errors={errors}
                     />
                 </Card>

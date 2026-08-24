@@ -12,13 +12,18 @@ class PatientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $patients = Patient::all();
+        $perPage = $request->integer('per_page', 5);
+        $patients = Patient::latest()->paginate($perPage)->withQueryString();
         return inertia(
             'patients/index',
             [
-                'patients' => $patients
+                'patients' => $patients,
+                'filter' =>
+                [
+                    'per_page' => $perPage
+                ]
             ]
         );
     }

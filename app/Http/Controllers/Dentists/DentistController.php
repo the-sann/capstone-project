@@ -7,8 +7,8 @@ use App\Http\Requests\DentistStoreRequest;
 use App\Http\Requests\DentistUpdateRequest;
 use App\Http\Resources\DentistResource;
 use App\Models\Dentist;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 
 class DentistController extends Controller
@@ -16,13 +16,18 @@ class DentistController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $dentists = Dentist::latest()->paginate(5);
+        $perPage = $request->integer('per_page', 5);
+        $dentists = Dentist::latest()->paginate($perPage)->withQueryString();
         return inertia(
             'dentists/index',
             [
-                'dentists' => $dentists
+                'dentists' => $dentists,
+                'filter' =>
+                [
+                    'per_page' => $perPage
+                ]
             ]
         );
     }

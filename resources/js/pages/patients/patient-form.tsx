@@ -44,18 +44,18 @@ interface DentistFormProps {
         value: PatientFormData[keyof PatientFormData],
     ) => void;
     errors: Partial<Record<keyof PatientFormData, string>>;
+    clearErrors: (field: keyof PatientFormData) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     processing: boolean;
-    dentist?: Dentist;
 }
 
 export default function PatientForm({
     data,
     setData,
     errors,
+    clearErrors,
     processing,
     onSubmit,
-    dentist,
 }: DentistFormProps) {
     return (
         <form onSubmit={onSubmit}>
@@ -68,7 +68,10 @@ export default function PatientForm({
                             id="name"
                             name="name"
                             value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            onChange={(e) => {
+                                setData('name', e.target.value);
+                                clearErrors('name');
+                            }}
                             placeholder="Patient Name"
                             aria-invalid={!!errors.name}
                         />
@@ -81,7 +84,10 @@ export default function PatientForm({
 
                         <Select
                             value={data.gender}
-                            onValueChange={(value) => setData('gender', value)}
+                            onValueChange={(value) => {
+                                setData('gender', value);
+                                clearErrors('gender');
+                            }}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select Gender" />
@@ -107,7 +113,10 @@ export default function PatientForm({
                             type="text"
                             min="0"
                             value={data.age}
-                            onChange={(e) => setData('age', e.target.value)}
+                            onChange={(e) => {
+                                setData('age', e.target.value);
+                                clearErrors('age');
+                            }}
                             placeholder="5"
                             aria-invalid={!!errors.age}
                         />
@@ -125,7 +134,10 @@ export default function PatientForm({
                             id="phone"
                             name="phone"
                             value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
+                            onChange={(e) => {
+                                setData('phone', e.target.value);
+                                clearErrors('phone');
+                            }}
                             placeholder="Phone"
                             aria-invalid={!!errors.phone}
                         />
@@ -142,7 +154,10 @@ export default function PatientForm({
                             id="address"
                             name="address"
                             value={data.address}
-                            onChange={(e) => setData('address', e.target.value)}
+                            onChange={(e) => {
+                                setData('address', e.target.value);
+                                clearErrors('address');
+                            }}
                             placeholder="Address"
                             aria-invalid={!!errors.address}
                         />

@@ -1,10 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import dentists from '@/routes/dentists';
+import dentistsRoute from '@/routes/dentists';
 import type { Dentist } from '@/types/app/types';
 import { DataTable } from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { columns } from './table/column';
+import { PaginationIconsOnly } from '@/components/ui/pagination';
 
 interface PaginatedDentists {
     data: Dentist[];
@@ -24,7 +25,7 @@ export default function Index({ dentists: dentistData }: DentistProps) {
             return;
         }
 
-        router.delete(dentists.destroy(id).url);
+        router.delete(dentistsRoute.destroy(id).url);
     };
 
     return (
@@ -44,6 +45,11 @@ export default function Index({ dentists: dentistData }: DentistProps) {
                     data={dentistData.data}
                     pagination={dentistData}
                 />
+                <PaginationIconsOnly
+                    currentPage={dentistData.current_page}
+                    lastPage={dentistData.last_page}
+                    route={dentistsRoute.index().url}
+                />
             </div>
         </>
     );
@@ -53,7 +59,7 @@ Index.layout = {
     breadcrumbs: [
         {
             title: 'Dentist',
-            href: dentists.index(),
+            href: dentistsRoute.index(),
         },
     ],
 };

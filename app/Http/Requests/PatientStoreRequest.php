@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Override;
 
 class PatientStoreRequest extends FormRequest
 {
@@ -24,10 +25,17 @@ class PatientStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'age' => ['required', 'integer', 'min:0', 'max:100'],
+            'age' => ['required', 'integer', 'min:5', 'max:100'],
             'gender' => 'required|string|max:20|in:male,female',
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+    #[Override]
+    public function messages()
+    {
+        return [
+            'age.min' => 'Patient Must at least 5 years old'
         ];
     }
 }

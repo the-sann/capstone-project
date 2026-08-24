@@ -4,10 +4,18 @@ import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { columns } from './table/column';
 import { Patient } from '@/types/app/types';
-import patients from '@/routes/patients';
+import patientsRoute from '@/routes/patients';
+import { PaginationIconsOnly } from '@/components/ui/pagination';
 
+interface PaginatedPatients {
+    data: Patient[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
 interface PatientProps {
-    patients: Patient[];
+    patients: PaginatedPatients;
 }
 export default function Index({ patients }: PatientProps) {
     return (
@@ -22,7 +30,17 @@ export default function Index({ patients }: PatientProps) {
                     </Button>
                 </Link>
 
-                <DataTable columns={columns} data={patients} />
+                <DataTable
+                    columns={columns}
+                    data={patients.data}
+                    pagination={patients}
+                />
+                <PaginationIconsOnly
+                    currentPage={patients.current_page}
+                    lastPage={patients.last_page}
+                    route={patientsRoute.index().url}
+                    perPage={patients.per_page}
+                />
             </div>
         </>
     );
@@ -31,7 +49,7 @@ Index.layout = {
     breadcrumbs: [
         {
             title: 'Patients',
-            href: patients.index(),
+            href: patientsRoute.index(),
         },
     ],
 };

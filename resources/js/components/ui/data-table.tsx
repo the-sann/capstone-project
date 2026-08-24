@@ -46,7 +46,7 @@ export function DataTable<TData extends RowData>({
         columns,
     });
 
-    return (<>
+    return (
         <div className="overflow-hidden rounded-md border">
             <Table>
                 <TableHeader>
@@ -92,12 +92,7 @@ export function DataTable<TData extends RowData>({
             </Table>
              
         </div>
-      {pagination && (
-    <PaginationIconsOnly
-        currentPage={pagination.current_page}
-        lastPage={pagination.last_page}
-    />
-)}
-        </>
+  
+        
     );
 }
