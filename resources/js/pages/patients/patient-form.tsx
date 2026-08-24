@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/field';
 
 import { Input } from '@/components/ui/input';
-import { Dentist } from '@/types/app/types';
+import { Dentist, Patient } from '@/types/app/types';
 
 interface PatientFormData {
     patient_id: string;
@@ -47,6 +47,7 @@ interface DentistFormProps {
     clearErrors: (field: keyof PatientFormData) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     processing: boolean;
+    patient?: Patient;
 }
 
 export default function PatientForm({
@@ -56,6 +57,7 @@ export default function PatientForm({
     clearErrors,
     processing,
     onSubmit,
+    patient,
 }: DentistFormProps) {
     return (
         <form onSubmit={onSubmit}>
@@ -187,7 +189,13 @@ export default function PatientForm({
                     </Button>
 
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Creating...' : 'Create Patient'}
+                        {processing
+                            ? patient
+                                ? 'Updating'
+                                : 'Creating...'
+                            : patient
+                              ? 'Update Patient'
+                              : 'Create Patient'}
                     </Button>
                 </div>
             </CardFooter>

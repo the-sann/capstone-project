@@ -46,6 +46,7 @@ export default function Index({ dentists: dentistData }: DentistProps) {
                     pagination={dentistData}
                 />
                 <PaginationIconsOnly
+                    perPage={dentistData.per_page}
                     currentPage={dentistData.current_page}
                     lastPage={dentistData.last_page}
                     route={dentistsRoute.index().url}

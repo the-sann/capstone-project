@@ -4,53 +4,53 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Dentist } from '@/types/app/types';
+import patients from '@/routes/patients';
+import { Patient } from '@/types/app/types';
 import { Head, useForm } from '@inertiajs/react';
-import DentistForm from './dentist-form';
-import dentists from '@/routes/dentists';
+import PatientForm from './patient-form';
 
 interface Props {
-    dentist: Dentist;
+    patient: Patient;
 }
 
-export default function Edit({ dentist }: Props) {
-    const { data, setData, post, errors, processing } = useForm({
-        name: dentist.name || '',
-        year_experienced: dentist.year_experienced || '',
-        skill: dentist.skill || '',
-        status: true,
-        image: '',
-        is_dentist: true,
-        user_type: dentist.user_type || '',
+export default function Edit({ patient }: Props) {
+    const { data, setData, post, errors, processing, clearErrors } = useForm({
+        name: patient.name || '',
+        patient_id: patient.patient_id || '',
+        age: patient.age || '',
+        phone: patient.phone || '',
+        address: patient.address || '',
+        gender: patient.gender || '',
         _method: 'PUT',
     });
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        post(dentists.update(dentist.id).url, { forceFormData: true });
+        post(patients.update(patient.id).url, { forceFormData: true });
     }
     return (
         <>
-            <Head title="Update Dentist" />
+            <Head title="Update Patient" />
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <h1 className="text-2xl font-semibold">Update Dentist</h1>
+                <h1 className="text-2xl font-semibold">Update Patient</h1>
 
                 <Card className="w-full sm:max-w-md">
                     <CardHeader>
                         <CardTitle>Update</CardTitle>
 
                         <CardDescription>
-                            Enter the dentist's information below.
+                            Enter the patient's information below.
                         </CardDescription>
                     </CardHeader>
 
-                    <DentistForm
+                    <PatientForm
                         processing={processing}
                         data={data}
                         setData={setData}
                         onSubmit={submit}
                         errors={errors}
-                        dentist={dentist}
+                        clearErrors={clearErrors}
+                        patient={patient}
                     />
                 </Card>
             </div>
@@ -60,11 +60,11 @@ export default function Edit({ dentist }: Props) {
 Edit.layout = {
     breadcrumbs: [
         {
-            title: 'Dentist',
-            href: dentists.index(),
+            title: 'Patient',
+            href: patients.index(),
         },
         {
-            title: 'Edit Dentist',
+            title: 'Edit Patient',
             href: '#',
         },
     ],

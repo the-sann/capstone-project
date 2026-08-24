@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Patients;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PatientStoreRequest;
+use App\Http\Requests\PatientUpdateRequest;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 
@@ -60,7 +61,12 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        //
+        return inertia(
+            'patients/show',
+            [
+                'patient' => $patient
+            ]
+        );
     }
 
     /**
@@ -68,15 +74,22 @@ class PatientController extends Controller
      */
     public function edit(Patient $patient)
     {
-        //
+        return inertia(
+            'patients/edit',
+            [
+                'patient' => $patient
+            ]
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Patient $patient)
+    public function update(PatientUpdateRequest $request, Patient $patient)
     {
-        //
+        $data = $request->validated();
+        $patient->update($data);
+        return to_route('patients.index')->with('success', "Patient \"{$patient->name}\" Was updated");
     }
 
     /**

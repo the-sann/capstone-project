@@ -15,6 +15,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import dentists from '@/routes/dentists';
+import { Link } from '@inertiajs/react';
+import patients from '@/routes/patients';
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -43,7 +45,7 @@ export const columns = columnHelper.columns([
         header: 'Action',
         id: 'actions',
         cell: ({ row }) => {
-            const dentist = row.original;
+            const patient = row.original;
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -52,8 +54,16 @@ export const columns = columnHelper.columns([
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href={patients.edit(patient.id).url}>
+                                Edit
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href={patients.show(patient.id).url}>
+                                View Details
+                            </Link>
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );
