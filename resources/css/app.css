@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Victor+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -8,11 +9,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-    --font-sans:
+    /* --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
-
+        'Noto Color Emoji'; */
+    --font-sans: 'Google Sans', ui-sans-serif, system-ui, sans-serif;
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);

@@ -1,8 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+// import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 
 export default function Dashboard() {
+    const { translations } = usePage().props as any;
+
     return (
         <>
             <Head title="Dashboard" />
@@ -23,7 +26,8 @@ export default function Dashboard() {
                 </div>
             </div> */}
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <h1>Dental Clinic Dashboard</h1>
+                <h1>{translations.welcome}</h1>
+                <p>{translations.dashboard}</p>
             </div>
         </>
     );
