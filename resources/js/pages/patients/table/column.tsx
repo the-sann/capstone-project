@@ -1,7 +1,7 @@
 'use client';
 import { createColumnHelper } from '@tanstack/react-table';
 import { type DataTableFeatures } from './data-table-features';
-import { Dentist, Patient } from '@/types/app/types';
+import { Patient } from '@/types/app/types';
 
 import { MoreHorizontal } from 'lucide-react';
 

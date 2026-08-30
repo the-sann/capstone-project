@@ -22,3 +22,21 @@ export type Patient = {
     created_at: string;
     updated_at: string;
 };
+export type Treatment = {
+    id: number;
+    name: string;
+    description: string | null;
+    price: string;
+    duration: string;
+    status: 'available' | 'unavailable';
+};
+export type Appointment = {
+    id: number;
+    appointment_id: string;
+    patient_id: number;
+    appointment_date: string;
+    appointment_time: string;
+    status: 'open' | 'closed';
+    reason: string;
+    note: string | null;
+};

@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import {
+    Activity,
     BookOpen,
+    Box,
     CarTaxiFrontIcon,
     FolderGit2,
     LayoutGrid,
@@ -25,6 +27,7 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import dentists from '@/routes/dentists';
 import patients from '@/routes/patients';
+import treatments from '@/routes/treatments';
 
 const mainNavItems: NavItem[] = [
     {
@@ -42,10 +45,16 @@ const mainNavItems: NavItem[] = [
         href: patients.index(),
         icon: User2,
     },
+
+    {
+        title: 'Treatment Services',
+        href: treatments.index(),
+        icon: Activity,
+    },
     {
         title: 'Materials',
         href: dashboard(),
-        icon: CarTaxiFrontIcon,
+        icon: Box,
     },
 ];
 

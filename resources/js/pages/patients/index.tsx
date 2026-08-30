@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { Head, Link } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { List, Plus } from 'lucide-react';
 import { columns } from './table/column';
 import { Patient } from '@/types/app/types';
-import patientsRoute from '@/routes/patients';
+import patientRoutes from '@/routes/patients';
 import { PaginationIconsOnly } from '@/components/ui/pagination';
 
 interface PaginatedPatients {
@@ -22,14 +22,27 @@ export default function Index({ patients }: PatientProps) {
         <>
             <Head title="Patient" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Link href="/patients/create">
-                    <Button>
-                        <Plus />
-                        Create
-                    </Button>
-                </Link>
-
+            <div className="flex h-full min-w-0 flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <div className="flex flex-wrap gap-3">
+                    <Link href="/patients/create" className="self-start">
+                        <Button>
+                            <Plus />
+                            Create Patient
+                        </Button>
+                    </Link>
+                    <Link href="/services-treatments">
+                        <Button variant="outline" className="gap-2">
+                            <List />
+                            Create Invoice
+                        </Button>
+                    </Link>
+                    <Link href="/services-treatments">
+                        <Button variant="outline" className="gap-2">
+                            <List />
+                            Create Appointment
+                        </Button>
+                    </Link>
+                </div>
                 <DataTable
                     columns={columns}
                     data={patients.data}
@@ -38,7 +51,7 @@ export default function Index({ patients }: PatientProps) {
                 <PaginationIconsOnly
                     currentPage={patients.current_page}
                     lastPage={patients.last_page}
-                    route={patientsRoute.index().url}
+                    route={patientRoutes.index().url}
                     perPage={patients.per_page}
                 />
             </div>
@@ -49,7 +62,7 @@ Index.layout = {
     breadcrumbs: [
         {
             title: 'Patients',
-            href: patientsRoute.index(),
+            href: patientRoutes.index(),
         },
     ],
 };
