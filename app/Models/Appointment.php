@@ -9,6 +9,7 @@ class Appointment extends Model
     protected $fillable = [
         'appointment_id',
         'patient_id',
+        'dentist_id',
         'appointment_date',
         'appointment_time',
         'status',
@@ -29,5 +30,9 @@ class Appointment extends Model
     public function reminder()
     {
         return $this->hasOne(AppointmentReminder::class);
+    }
+    public function dentist()
+    {
+        return $this->belongsTo(Dentist::class);
     }
 }

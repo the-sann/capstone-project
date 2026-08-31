@@ -34,7 +34,7 @@ export default function Index({ dentists: dentistData }: DentistProps) {
 
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Link href="/dentists/create">
-                    <Button>
+                    <Button variant="outline">
                         <Plus />
                         Create
                     </Button>

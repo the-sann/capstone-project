@@ -21,7 +21,7 @@ class Patient extends Model
             'age' => 'integer',
         ];
     }
-    public function appoinments()
+    public function appointments()
     {
         return $this->hasMany(Appointment::class);
     }

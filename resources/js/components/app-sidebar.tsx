@@ -4,9 +4,8 @@ import {
     BookOpen,
     Box,
     CarTaxiFrontIcon,
-    FolderGit2,
     LayoutGrid,
-    User,
+    Timer,
     User2,
     UserCircle2,
 } from 'lucide-react';
@@ -28,6 +27,7 @@ import type { NavItem } from '@/types';
 import dentists from '@/routes/dentists';
 import patients from '@/routes/patients';
 import treatments from '@/routes/treatments';
+import appointments from '@/routes/appointments';
 
 const mainNavItems: NavItem[] = [
     {
@@ -44,6 +44,11 @@ const mainNavItems: NavItem[] = [
         title: 'Patients',
         href: patients.index(),
         icon: User2,
+    },
+    {
+        title: 'Appointment',
+        href: appointments.index(),
+        icon: Timer,
     },
 
     {

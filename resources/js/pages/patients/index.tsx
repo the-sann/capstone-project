@@ -25,7 +25,7 @@ export default function Index({ patients }: PatientProps) {
             <div className="flex h-full min-w-0 flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex flex-wrap gap-3">
                     <Link href="/patients/create" className="self-start">
-                        <Button>
+                        <Button variant="outline">
                             <Plus />
                             Create Patient
                         </Button>
@@ -36,7 +36,7 @@ export default function Index({ patients }: PatientProps) {
                             Create Invoice
                         </Button>
                     </Link>
-                    <Link href="/services-treatments">
+                    <Link href="/appointments/create">
                         <Button variant="outline" className="gap-2">
                             <List />
                             Create Appointment

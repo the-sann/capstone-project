@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Appointment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentStoreRequest;
 use App\Http\Requests\AppointmentUpdateRequest;
+use App\Http\Resources\PatientResource;
 use App\Models\Appointment;
+use App\Models\Dentist;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -34,10 +37,16 @@ class AppointmentController extends Controller
      */
     public function create()
     {
+        $patient = Patient::select('id', 'name', 'patient_id')->get();
+        $dentists = Dentist::select('id', 'name')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
         return inertia(
             'appointments/create',
             [
-                ''
+                'patients' => $patient,
+                'dentists' => $dentists,
             ]
         );
     }

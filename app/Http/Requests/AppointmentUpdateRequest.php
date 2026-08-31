@@ -35,6 +35,7 @@ class AppointmentUpdateRequest extends FormRequest
                 Rule::unique('appointments', 'appointment_id')->ignore($appointment),
             ],
             'patient_id' => ['required', 'exists:patients,id'],
+            'dentist_id' => ['required', 'exists:dentists,id'],
             'appointment_date' => ['required', 'date'],
             'appointment_time' => ['required', 'date_format:H:i'],
             'status' => ['required', 'in:open,closed'],

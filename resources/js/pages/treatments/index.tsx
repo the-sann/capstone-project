@@ -33,7 +33,7 @@ export default function Index({ treatments }: Props) {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
                     <Link href="/treatments/create">
-                        <Button className="gap-2">
+                        <Button className="gap-2" variant="outline">
                             <Plus className="h-4 w-4" />
                             Create Treatment
                         </Button>

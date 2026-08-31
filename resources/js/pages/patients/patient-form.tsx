@@ -29,7 +29,6 @@ import { Input } from '@/components/ui/input';
 import { Dentist, Patient } from '@/types/app/types';
 
 interface PatientFormData {
-    patient_id: string;
     name: string;
     age: string;
     gender: string;
@@ -182,7 +181,6 @@ export default function PatientForm({
                             setData('phone', '');
                             setData('address', '');
                             setData('gender', '');
-                            setData('patient_id', '');
                         }}
                     >
                         Reset

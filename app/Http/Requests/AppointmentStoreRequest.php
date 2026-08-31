@@ -23,8 +23,8 @@ class AppointmentStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'appointment_id' => ['required', 'string', 'max:255', 'unique:appointments,appointment_id'],
             'patient_id' => ['required', 'exists:patients,id'],
+            'dentist_id' => ['required', 'exists:dentists,id'],
             'appointment_date' => ['required', 'date'],
             'appointment_time' => ['required', 'date_format:H:i'],
             'status' => ['required', 'in:open,closed'],
