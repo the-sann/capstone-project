@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import dentists from '@/routes/dentists';
+import servicesTreatments from '@/routes/services-treatments';
 import treatments from '@/routes/treatments';
 import { Dentist, Treatment } from '@/types/app/types';
 import { Head, Link } from '@inertiajs/react';
@@ -72,6 +73,10 @@ Show.layout = {
         {
             title: 'Treatment',
             href: treatments.index(),
+        },
+        {
+            title: 'Treatment Services',
+            href: servicesTreatments.index(),
         },
         {
             title: 'Show',

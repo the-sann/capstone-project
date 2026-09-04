@@ -33,11 +33,21 @@ export type Treatment = {
 export type Appointment = {
     id: number;
     appointment_id: string;
-    patient_id: string;
+    patient_id: number;
+    dentist_id: number;
     appointment_date: string;
     appointment_time: string;
     status: 'open' | 'closed';
     reason: string;
     note: string | null;
-    dentist_id: string;
+    patient: {
+        id: number;
+        patient_id: string;
+        name: string;
+        phone: string;
+    };
+    dentist: {
+        id: number;
+        name: string;
+    };
 };

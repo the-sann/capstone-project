@@ -46,7 +46,7 @@ const mainNavItems: NavItem[] = [
         icon: User2,
     },
     {
-        title: 'Appointment',
+        title: 'Appointments',
         href: appointments.index(),
         icon: Timer,
     },

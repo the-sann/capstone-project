@@ -9,6 +9,7 @@ use App\Http\Resources\PatientResource;
 use App\Models\Appointment;
 use App\Models\Dentist;
 use App\Models\Patient;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -19,10 +20,41 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->integer('per_page', 5);
-        $appointments = Appointment::latest()->paginate($perPage)->withQueryString();
+        $appointments = Appointment::with(['dentist', 'patient'])
+            ->where('status', 'open')
+            ->orderBy('appointment_date', 'asc')
+            ->paginate($perPage)->withQueryString();
+        $today = now()->toDateString();
+        $tomorrow = now()->addDay()->toDateString();
+        $todayAppointments = Appointment::with(['dentist', 'patient'])
+            ->where('status', 'open')
+            ->whereDate('appointment_date', $today)
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+        $tomorrowAppointments = Appointment::with(['dentist', 'patient'])
+            ->where('status', 'open')
+            ->whereDate('appointment_date', $tomorrow)
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+        $missedAppointments = Appointment::with(['dentist', 'patient'])
+            ->where('status', 'open')
+            ->whereDate('appointment_date', '<', $today)
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->get();
+        $upcomingAppointments = Appointment::with(['dentist', 'patient'])
+            ->where('status', 'open')
+            ->whereDate('appointment_date', '>', $tomorrow)
+            ->orderBy('appointment_date', 'asc')
+            ->paginate($perPage)->withQueryString();
+
         return inertia(
             'appointments/index',
             [
+                'todayAppointments' => $todayAppointments,
+                'tomorrowAppointments' => $tomorrowAppointments,
+                'missedAppointments' => $missedAppointments,
+                'upcomingAppointments' => $upcomingAppointments,
                 'appointments' => $appointments,
                 'filter' =>
                 [
@@ -51,6 +83,17 @@ class AppointmentController extends Controller
         );
     }
 
+    public function close(Appointment $appointment): RedirectResponse
+    {
+        $appointment->update([
+            'status' => 'closed',
+        ]);
+
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'Appointment closed successfully.');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -67,6 +110,10 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
+        $appointment->load([
+            'patient',
+            'dentist',
+        ]);
         return inertia(
             'appointments/show',
             [

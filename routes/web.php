@@ -15,6 +15,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('dentists', DentistController::class);
     Route::resource('patients', PatientController::class);
     Route::resource('treatments', TreatmentController::class);
+    Route::patch(
+        '/appointments/{appointment}/close',
+        [AppointmentController::class, 'close']
+    )->name('appointments.close');
     Route::resource('appointments', AppointmentController::class);
     Route::get('/services-treatments', [TreatmentServiceController::class, 'services'])->name('services-treatments.index');
     Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
