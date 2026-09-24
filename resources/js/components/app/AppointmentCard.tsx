@@ -1,5 +1,6 @@
 import { Appointment } from '@/types/app/types';
 import { Button } from '../ui/button';
+import { formatTime } from '@/utils/dateTime';
 import {
     Check,
     Copy,
@@ -94,14 +95,6 @@ export default function AppointmentCard({
     const currentStyle = timingStyles[timing];
     const TimingIcon = currentStyle.Icon;
 
-    // Convert 24-hour time to 12-hour AM/PM
-    const formatTime = (time: string) => {
-        const [hours, minutes] = time.split(':');
-        const hour = Number(hours);
-        const period = hour >= 12 ? 'PM' : 'AM';
-        const formattedHour = hour % 12 || 12;
-        return `${String(formattedHour).padStart(2, '0')}:${minutes} ${period}`;
-    };
     // Today / Tomorrow / date
     const getDateLabel = (date: string) => {
         const appointmentDate = new Date(date);
@@ -159,7 +152,9 @@ export default function AppointmentCard({
             </div>
 
             <div className="mt-4 space-y-2 text-sm">
-                <p>🦷 {appointment.reason}</p>
+                <p className="wrap-break-word whitespace-normal">
+                    🦷 {appointment.reason}
+                </p>
                 <p>👨‍⚕️ Dr. {appointment.dentist.name}</p>
                 <div>
                     <p className="mb-1 text-muted-foreground">Phone</p>

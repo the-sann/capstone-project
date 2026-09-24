@@ -27,7 +27,7 @@ return new class extends Migration
                 'closed',
             ])->default('open');
             $table->string('reason');
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

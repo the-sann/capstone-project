@@ -28,12 +28,7 @@ class AppointmentUpdateRequest extends FormRequest
         $appointment = $this->route('appointment');
 
         return [
-            'appointment_id' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('appointments', 'appointment_id')->ignore($appointment),
-            ],
+
             'patient_id' => ['required', 'exists:patients,id'],
             'dentist_id' => ['required', 'exists:dentists,id'],
             'appointment_date' => ['required', 'date'],

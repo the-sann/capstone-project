@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         '/appointments/{appointment}/close',
         [AppointmentController::class, 'close']
     )->name('appointments.close');
+    Route::get('/all-appointments', [AppointmentController::class, 'getAllAppointments'])->name('appointments.all');
     Route::resource('appointments', AppointmentController::class);
     Route::get('/services-treatments', [TreatmentServiceController::class, 'services'])->name('services-treatments.index');
     Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');

@@ -70,8 +70,8 @@ export default function Create({ patients, dentists }: Props) {
 Create.layout = {
     breadcrumbs: [
         {
-            title: 'Patients',
-            href: patientsRoute.index(),
+            title: 'Appointment',
+            href: appointments.index(),
         },
         {
             title: 'create',

@@ -14,6 +14,21 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
+
+    public function getAllAppointments(Request $request)
+    {
+        $perPage = $request->integer('per_page', 5);
+
+        $appointments = Appointment::with(['dentist', 'patient'])
+            ->orderBy('appointment_date', 'asc')
+            ->orderBy('appointment_time', 'asc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return inertia('appointments/all-appointments', [
+            'appointments' => $appointments,
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -127,12 +142,11 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment)
     {
-        return inertia(
-            'appointments/edit',
-            [
-                'appointment' => $appointment,
-            ]
-        );
+        return inertia('appointments/edit', [
+            'appointment' => $appointment->load(['patient', 'dentist']),
+            'patients' => Patient::select('id', 'name', 'patient_id')->get(),
+            'dentists' => Dentist::select('id', 'name')->get(),
+        ]);
     }
 
     /**

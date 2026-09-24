@@ -15,18 +15,28 @@ class PatientController extends Controller
      */
     public function index(Request $request)
     {
+        $search = $request->input('search');
         $perPage = $request->integer('per_page', 5);
-        $patients = Patient::latest()->paginate($perPage)->withQueryString();
-        return inertia(
-            'patients/index',
-            [
-                'patients' => $patients,
-                'filter' =>
-                [
-                    'per_page' => $perPage
-                ]
-            ]
-        );
+
+        $patients = Patient::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('patient_id', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return inertia('patients/index', [
+            'patients' => $patients,
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     /**

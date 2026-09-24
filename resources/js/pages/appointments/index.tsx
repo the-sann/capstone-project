@@ -43,7 +43,7 @@ export default function Index({
                             Create Appointment
                         </Button>
                     </Link>
-                    <Link href="/appointments">
+                    <Link href={appointmentRoutes.all()}>
                         <Button variant="outline" className="gap-2">
                             <List />
                             All Appointments

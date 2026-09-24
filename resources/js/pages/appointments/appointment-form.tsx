@@ -71,7 +71,9 @@ export default function AppointmentForm({
                 <FieldGroup>
                     {/* Patient */}
                     <Field>
-                        <FieldLabel htmlFor="patient_id">Patient</FieldLabel>
+                        <FieldLabel htmlFor="patient_id">
+                            Patient <span className="text-red-500">*</span>
+                        </FieldLabel>
                         <Popover open={open} onOpenChange={setOpen}>
                             <PopoverTrigger asChild>
                                 <Button
@@ -141,7 +143,9 @@ export default function AppointmentForm({
                     </Field>
                     {/* Dentist */}
                     <Field>
-                        <FieldLabel>Dentist</FieldLabel>
+                        <FieldLabel>
+                            Dentist <span className="text-red-500">*</span>
+                        </FieldLabel>
 
                         <Popover open={isOpen} onOpenChange={setIsOpen}>
                             <PopoverTrigger asChild>
@@ -271,7 +275,9 @@ export default function AppointmentForm({
 
                     {/* Reason */}
                     <Field>
-                        <FieldLabel htmlFor="reason">Reason</FieldLabel>
+                        <FieldLabel htmlFor="reason">
+                            Reason <span className="text-red-500">*</span>
+                        </FieldLabel>
 
                         <Input
                             id="reason"
@@ -296,7 +302,9 @@ export default function AppointmentForm({
 
                     {/* Note */}
                     <Field>
-                        <FieldLabel htmlFor="note">Note</FieldLabel>
+                        <FieldLabel htmlFor="note">
+                            Note
+                        </FieldLabel>
 
                         <Textarea
                             id="note"

@@ -33,15 +33,46 @@ interface PaginatedPatients {
 
 interface Props {
     patients: PaginatedPatients;
+    filters: {
+        search?: string;
+    };
 }
 
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 
-export default function Index({ patients }: Props) {
+export default function Index({ patients, filters }: Props) {
     const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+    const [search, setSearch] = useState(filters.search ?? '');
 
+    const handleSearch = () => {
+        router.get(
+            patientRoutes.index().url,
+            {
+                search: search || undefined,
+                per_page: patients.per_page,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
+    const clearSearch = () => {
+        setSearch('');
+
+        router.get(
+            patientRoutes.index().url,
+            {
+                per_page: patients.per_page,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
     const copyPhone = async (phone: string) => {
         await navigator.clipboard.writeText(phone);
 
@@ -88,15 +119,38 @@ export default function Index({ patients }: Props) {
                 </div>
                 <div className="w-full max-w-sm">
                     <Field>
-                        <FieldLabel htmlFor="input-button-group">
-                            Search
-                        </FieldLabel>
+                        <FieldLabel htmlFor="patient-search">Search</FieldLabel>
+
                         <ButtonGroup>
                             <Input
-                                id="input-button-group"
-                                placeholder="Type to search..."
+                                id="patient-search"
+                                placeholder="Name, ID, or phone..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearch();
+                                    }
+                                }}
                             />
-                            <Button variant="outline">Search</Button>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleSearch}
+                            >
+                                Search
+                            </Button>
+
+                            {search && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={clearSearch}
+                                >
+                                    Clear
+                                </Button>
+                            )}
                         </ButtonGroup>
                     </Field>
                 </div>
@@ -168,9 +222,11 @@ export default function Index({ patients }: Props) {
 
                                             {/* Delete */}
                                             <DropdownMenuItem
-                                                onClick={() =>
-                                                    deletePatient(patient)
-                                                }
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    deletePatient(patient);
+                                                }}
                                                 className="cursor-pointer text-destructive focus:text-destructive"
                                             >
                                                 <Trash2 className="mr-2 h-4 w-4" />
