@@ -22,6 +22,8 @@ import {
     Phone,
     UserRound,
 } from 'lucide-react';
+import patients from '@/routes/patients';
+import treatmentCases from '@/routes/treatments-case';
 
 interface Props {
     appointment: Appointment;
@@ -147,6 +149,29 @@ export default function Show({ appointment }: Props) {
                                     {appointment.dentist.name}
                                 </p>
                             </div>
+                            {/* Treatment Case */}
+                            {appointment.treatment_case_id && (
+                                <div className="border-t pt-4">
+                                    <p className="text-xs text-muted-foreground">
+                                        Treatment Case
+                                    </p>
+
+                                    <Button
+                                        variant="link"
+                                        className="mt-1 h-auto p-0"
+                                        onClick={() =>
+                                            router.visit(
+                                                treatmentCases.show(
+                                                    appointment.treatment_case_id!,
+                                                ),
+                                            )
+                                        }
+                                    >
+                                        View treatment case
+                                        <ArrowUpRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -188,14 +213,14 @@ export default function Show({ appointment }: Props) {
                                 <Button
                                     variant="link"
                                     className="mt-3 h-auto p-0"
-                                    // Add your patient route here
-                                    // onClick={() =>
-                                    //     router.visit(
-                                    //         patients.show(
-                                    //             appointment.patient.id,
-                                    //         ),
-                                    //     )
-                                    // }
+
+                                    onClick={() =>
+                                        router.visit(
+                                            patients.show(
+                                                appointment.patient.id,
+                                            ),
+                                        )
+                                    }
                                 >
                                     View patient
                                     <ArrowUpRight className="h-4 w-4" />
@@ -257,10 +282,10 @@ export default function Show({ appointment }: Props) {
 
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+
                                 <AlertDialogAction asChild>
                                     <Button
                                         variant="destructive"
-                                        className="text-white hover:text-white"
                                         onClick={handleCloseAppointment}
                                     >
                                         Close Appointment

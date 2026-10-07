@@ -5,16 +5,41 @@ namespace App\Http\Controllers\Appointment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentStoreRequest;
 use App\Http\Requests\AppointmentUpdateRequest;
-use App\Http\Resources\PatientResource;
 use App\Models\Appointment;
+use App\Models\AppointmentReminder;
 use App\Models\Dentist;
 use App\Models\Patient;
+use App\Models\TreatmentCase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
+    public function createForTreatmentCase(TreatmentCase $treatmentCase)
+    {
+        $patients = Patient::select(
+            'id',
+            'name',
+            'patient_id'
+        )->get();
 
+        $dentists = Dentist::select('id', 'name')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
+
+        $treatmentCase->load([
+            'patient:id,name,patient_id',
+            'dentist:id,name',
+        ]);
+
+        return inertia('appointments/create', [
+            'patients' => $patients,
+            'dentists' => $dentists,
+            'treatmentCases' => [],
+            'selectedTreatmentCase' => $treatmentCase,
+        ]);
+    }
     public function getAllAppointments(Request $request)
     {
         $perPage = $request->integer('per_page', 5);
@@ -27,6 +52,29 @@ class AppointmentController extends Controller
 
         return inertia('appointments/all-appointments', [
             'appointments' => $appointments,
+        ]);
+    }
+    public function due()
+    {
+        $reminders = AppointmentReminder::with([
+            'appointment.patient',
+            'appointment.dentist',
+        ])
+            ->where('status', 'pending')
+            ->where('reminder_at', '<=', now())
+            ->get();
+
+        return response()->json($reminders);
+    }
+    public function remind(AppointmentReminder $reminder)
+    {
+        $reminder->update([
+            'status' => 'reminded',
+            'reminded_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
         ]);
     }
     /**
@@ -82,20 +130,46 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $patient = Patient::select('id', 'name', 'patient_id')->get();
-        $dentists = Dentist::select('id', 'name')
+        $patients = Patient::select(
+            'id',
+            'name',
+            'patient_id'
+        )
+            ->orderBy('name')
+            ->get();
+
+        $dentists = Dentist::select(
+            'id',
+            'name'
+        )
             ->where('status', true)
             ->orderBy('name')
             ->get();
-        return inertia(
-            'appointments/create',
-            [
-                'patients' => $patient,
-                'dentists' => $dentists,
-            ]
-        );
+
+        $treatmentCases = TreatmentCase::with([
+            'patient:id,name,patient_id',
+            'dentist:id,name',
+        ])
+            ->latest()
+            ->get();
+
+        $selectedTreatmentCase = null;
+
+        if ($request->filled('treatment_case_id')) {
+            $selectedTreatmentCase = $treatmentCases->firstWhere(
+                'id',
+                (int) $request->treatment_case_id
+            );
+        }
+
+        return inertia('appointments/create', [
+            'patients' => $patients,
+            'dentists' => $dentists,
+            'treatmentCases' => $treatmentCases,
+            'selectedTreatmentCase' => $selectedTreatmentCase,
+        ]);
     }
 
     public function close(Appointment $appointment): RedirectResponse
@@ -128,7 +202,9 @@ class AppointmentController extends Controller
         $appointment->load([
             'patient',
             'dentist',
+            'treatmentCase',
         ]);
+
         return inertia(
             'appointments/show',
             [
@@ -143,9 +219,28 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         return inertia('appointments/edit', [
-            'appointment' => $appointment->load(['patient', 'dentist']),
-            'patients' => Patient::select('id', 'name', 'patient_id')->get(),
-            'dentists' => Dentist::select('id', 'name')->get(),
+            'appointment' => $appointment->load([
+                'patient',
+                'dentist',
+                'treatmentCase',
+            ]),
+
+            'patients' => Patient::select(
+                'id',
+                'name',
+                'patient_id'
+            )->get(),
+
+            'dentists' => Dentist::select(
+                'id',
+                'name'
+            )->get(),
+
+            'treatmentCases' => TreatmentCase::with([
+                'patient:id,name,patient_id',
+            ])
+                ->select('id', 'patient_id')
+                ->get(),
         ]);
     }
 

@@ -27,20 +27,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useState } from 'react';
 
+interface TreatmentCase {
+    id: number;
+    case_id: string;
+    patient?: {
+        id: number;
+        name: string;
+    };
+}
+
 interface AppointmentFormData {
     patient_id: string;
+    dentist_id: string;
+    treatment_case_id: number | null;
     appointment_date: string;
     appointment_time: string;
     status: string;
     reason: string;
     note: string;
-    dentist_id: string;
 }
 
 interface AppointmentFormProps {
     data: AppointmentFormData;
     patients: Patient[];
     dentists: Dentist[];
+    selectedTreatmentCase: TreatmentCase | null;
+    treatmentCases: TreatmentCase[];
     setData: (
         key: keyof AppointmentFormData,
         value: AppointmentFormData[keyof AppointmentFormData],
@@ -57,11 +69,13 @@ export default function AppointmentForm({
     patients,
     dentists,
     setData,
+    treatmentCases,
     errors,
     clearErrors,
     onSubmit,
     processing,
     appointment,
+    selectedTreatmentCase,
 }: AppointmentFormProps) {
     const [open, setOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -201,6 +215,98 @@ export default function AppointmentForm({
                             <FieldError>{errors.dentist_id}</FieldError>
                         )}
                     </Field>
+                    {/* Treatment Case */}
+                    <Field>
+                        <FieldLabel htmlFor="treatment_case_id">
+                            Treatment Case
+                        </FieldLabel>
+
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    className="w-full justify-between"
+                                >
+                                    {data.treatment_case_id
+                                        ? (treatmentCases.find(
+                                              (treatmentCase) =>
+                                                  treatmentCase.id ===
+                                                  data.treatment_case_id,
+                                          )?.case_id ??
+                                          (selectedTreatmentCase?.id ===
+                                          data.treatment_case_id
+                                              ? selectedTreatmentCase.case_id
+                                              : 'Select treatment case'))
+                                        : 'Select treatment case'}
+
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+
+                            <PopoverContent className="w-full p-0">
+                                <Command>
+                                    <CommandInput placeholder="Search treatment case..." />
+
+                                    <CommandEmpty>
+                                        No treatment case found.
+                                    </CommandEmpty>
+
+                                    <CommandGroup>
+                                        {treatmentCases.map((treatmentCase) => (
+                                            <CommandItem
+                                                key={treatmentCase.id}
+                                                value={`${treatmentCase.case_id} ${
+                                                    treatmentCase.patient
+                                                        ?.name ?? ''
+                                                }`}
+                                                onSelect={() => {
+                                                    setData(
+                                                        'treatment_case_id',
+                                                        treatmentCase.id,
+                                                    );
+
+                                                    clearErrors(
+                                                        'treatment_case_id',
+                                                    );
+                                                }}
+                                            >
+                                                <Check
+                                                    className={`mr-2 h-4 w-4 ${
+                                                        data.treatment_case_id ===
+                                                        treatmentCase.id
+                                                            ? 'opacity-100'
+                                                            : 'opacity-0'
+                                                    }`}
+                                                />
+
+                                                <div>
+                                                    <div>
+                                                        {treatmentCase.case_id}
+                                                    </div>
+
+                                                    {treatmentCase.patient
+                                                        ?.name && (
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {
+                                                                treatmentCase
+                                                                    .patient
+                                                                    .name
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+
+                        {errors.treatment_case_id && (
+                            <FieldError>{errors.treatment_case_id}</FieldError>
+                        )}
+                    </Field>
 
                     {/* Appointment Date */}
                     <Field>
@@ -302,9 +408,7 @@ export default function AppointmentForm({
 
                     {/* Note */}
                     <Field>
-                        <FieldLabel htmlFor="note">
-                            Note
-                        </FieldLabel>
+                        <FieldLabel htmlFor="note">Note</FieldLabel>
 
                         <Textarea
                             id="note"
@@ -335,6 +439,7 @@ export default function AppointmentForm({
                             setData('appointment_time', '');
                             setData('status', 'open');
                             setData('reason', '');
+                            setData('treatment_case_id', null);
                             setData('note', '');
                         }}
                     >

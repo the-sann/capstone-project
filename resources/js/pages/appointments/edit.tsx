@@ -10,18 +10,29 @@ import {
 import appointments from '@/routes/appointments';
 import patientsRoute from '@/routes/patients';
 
-import { Appointment, Dentist, Patient } from '@/types/app/types';
+import {
+    Appointment,
+    Dentist,
+    Patient,
+    TreatmentCase,
+} from '@/types/app/types';
 import AppointmentForm from './appointment-form';
 interface Props {
     appointment: Appointment;
     patients: Patient[];
     dentists: Dentist[];
+    treatmentCases: TreatmentCase[];
 }
-
-export default function Edit({ appointment, dentists, patients }: Props) {
+export default function Edit({
+    appointment,
+    dentists,
+    patients,
+    treatmentCases,
+}: Props) {
     const { data, setData, post, errors, processing, clearErrors } = useForm({
         patient_id: String(appointment.patient_id),
         dentist_id: String(appointment.dentist_id),
+        treatment_case_id: appointment.treatment_case_id ?? null,
         appointment_date: appointment.appointment_date
             ? appointment.appointment_date.slice(0, 10)
             : '',
@@ -60,6 +71,10 @@ export default function Edit({ appointment, dentists, patients }: Props) {
                         appointment={appointment}
                         patients={patients}
                         dentists={dentists}
+                        treatmentCases={treatmentCases}
+                        selectedTreatmentCase={
+                            appointment.treatment_case ?? null
+                        }
                         processing={processing}
                         data={data}
                         setData={setData}

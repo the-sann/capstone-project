@@ -28,7 +28,6 @@ return new class extends Migration
             ])->default('open');
             $table->string('reason');
             $table->text('note')->nullable();
-            $table->timestamps();
         });
     }
 

@@ -21,4 +21,8 @@ class Treatment extends Model
             'duration' => 'integer',
         ];
     }
+    public function treatmentCaseItems()
+    {
+        return $this->hasMany(TreatmentCaseItem::class);
+    }
 }

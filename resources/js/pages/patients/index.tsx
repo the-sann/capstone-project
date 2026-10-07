@@ -41,6 +41,7 @@ interface Props {
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import treatmentsCase from '@/routes/treatments-case';
 
 export default function Index({ patients, filters }: Props) {
     const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
@@ -103,10 +104,10 @@ export default function Index({ patients, filters }: Props) {
                         </Button>
                     </Link>
 
-                    <Link href="/services-treatments">
+                    <Link href={treatmentsCase.create()}>
                         <Button variant="outline" className="gap-2">
-                            <List />
-                            Create Invoice
+                            <Plus />
+                            Create Treatment Case
                         </Button>
                     </Link>
 

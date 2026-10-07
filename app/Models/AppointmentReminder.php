@@ -26,4 +26,10 @@ class AppointmentReminder extends Model
     {
         return $this->belongsTo(Appointment::class);
     }
+    public function scopeDue($query)
+    {
+        return $query
+            ->where('status', 'pending')
+            ->where('reminder_at', '<=', now());
+    }
 }

@@ -22,15 +22,9 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
 
-    const { locale } = usePage().props;
-
     const handleLogout = () => {
         cleanup();
         router.flushAll();
-    };
-
-    const switchLanguage = (lang: 'en' | 'km') => {
-        router.post(`/language/${lang}`);
     };
 
     return (
@@ -71,7 +65,7 @@ export function UserMenuContent({ user }: Props) {
                 </DropdownMenuItem>
 
                 {/* Language */}
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                     onClick={() =>
                         switchLanguage(locale === 'en' ? 'km' : 'en')
                     }
@@ -79,7 +73,7 @@ export function UserMenuContent({ user }: Props) {
                     <Languages className="mr-2 h-4 w-4" />
 
                     {locale === 'en' ? 'ខ្មែរ' : 'English'}
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />

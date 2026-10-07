@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('appointment_reminders', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('appointment_id')
+                ->unique()
                 ->constrained('appointments')
                 ->cascadeOnDelete();
+
             $table->dateTime('reminder_at');
             $table->dateTime('reminded_at')->nullable();
 
@@ -23,6 +27,7 @@ return new class extends Migration
                 'pending',
                 'reminded',
             ])->default('pending');
+
             $table->timestamps();
         });
     }

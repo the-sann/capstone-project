@@ -3,7 +3,17 @@ import { PaginationIconsOnly } from '@/components/ui/pagination';
 import appointmentRoutes from '@/routes/appointments';
 import { Head, Link, router } from '@inertiajs/react';
 import AppointmentCard from '@/components/app/AppointmentCard';
-import { CalendarX, List, Timer } from 'lucide-react';
+import { Eye, Pencil, Trash2, Ellipsis, Timer, List } from 'lucide-react';
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import { formatTime } from '@/utils/dateTime';
 import { Button } from '@/components/ui/button';
 import NoAppointments from './components/NoAppointments';
 
@@ -30,6 +40,34 @@ export default function Index({
         if (confirm(`Are you sure you want to delete this appointment?`)) {
             router.delete(`/appointments/${appointment.id}`);
         }
+    };
+    const getDateLabel = (date: string) => {
+        const appointmentDate = new Date(date);
+        const today = new Date();
+
+        const appointmentDay = appointmentDate.toLocaleDateString('en-CA', {
+            timeZone: 'Asia/Phnom_Penh',
+        });
+
+        const todayDay = today.toLocaleDateString('en-CA', {
+            timeZone: 'Asia/Phnom_Penh',
+        });
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const tomorrowDay = tomorrow.toLocaleDateString('en-CA', {
+            timeZone: 'Asia/Phnom_Penh',
+        });
+
+        if (appointmentDay === todayDay) return 'Today';
+        if (appointmentDay === tomorrowDay) return 'Tomorrow';
+
+        return appointmentDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'Asia/Phnom_Penh',
+        });
     };
     return (
         <>
@@ -125,13 +163,14 @@ export default function Index({
                         <h2 className="text-xl font-semibold">
                             Upcoming Appointments
                         </h2>
+
                         {upcomingAppointments.data.length === 0 ? (
                             <NoAppointments
                                 title="No upcoming appointments"
                                 description="You have no upcoming appointments."
                             />
                         ) : (
-                            <div className="mt-4 space-y-3">
+                            <div className="mt-4">
                                 {upcomingAppointments.data.map(
                                     (appointment) => (
                                         <div
@@ -142,22 +181,89 @@ export default function Index({
                                                 <p className="font-medium">
                                                     {appointment.patient.name}
                                                 </p>
+
                                                 <p className="text-sm text-muted-foreground">
                                                     {appointment.reason}
                                                 </p>
                                             </div>
 
-                                            <div className="text-right">
-                                                <p>
-                                                    {
-                                                        appointment.appointment_date
-                                                    }
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {
-                                                        appointment.appointment_time
-                                                    }
-                                                </p>
+                                            <div className="flex items-center gap-3">
+                                                <div className="text-right">
+                                                    <p>
+                                                        {getDateLabel(
+                                                            appointment.appointment_date,
+                                                        )}
+                                                    </p>
+
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {formatTime(
+                                                            appointment.appointment_time,
+                                                        )}
+                                                    </p>
+                                                </div>
+
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 shrink-0"
+                                                        >
+                                                            <Ellipsis className="h-4 w-4" />
+                                                            <span className="sr-only">
+                                                                Appointment
+                                                                actions
+                                                            </span>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        className="w-40"
+                                                    >
+                                                        <DropdownMenuItem
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={`/appointments/${appointment.id}`}
+                                                                className="flex cursor-pointer items-center"
+                                                            >
+                                                                <Eye className="mr-2 h-4 w-4" />
+                                                                View
+                                                            </Link>
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuItem
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={`/appointments/${appointment.id}/edit`}
+                                                                className="flex cursor-pointer items-center"
+                                                            >
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </Link>
+                                                        </DropdownMenuItem>
+
+                                                        <DropdownMenuSeparator />
+
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                deleteAppointment(
+                                                                    appointment,
+                                                                );
+                                                            }}
+                                                            className="cursor-pointer text-destructive focus:text-destructive"
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         </div>
                                     ),

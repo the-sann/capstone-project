@@ -5,6 +5,7 @@ import {
     Box,
     CarTaxiFrontIcon,
     LayoutGrid,
+    Syringe,
     Timer,
     User2,
     UserCircle2,
@@ -28,6 +29,7 @@ import dentists from '@/routes/dentists';
 import patients from '@/routes/patients';
 import treatments from '@/routes/treatments';
 import appointments from '@/routes/appointments';
+import treatmentsCase from '@/routes/treatments-case';
 
 const mainNavItems: NavItem[] = [
     {
@@ -44,6 +46,11 @@ const mainNavItems: NavItem[] = [
         title: 'Patients',
         href: patients.index(),
         icon: User2,
+    },
+    {
+        title: 'Treatement Case',
+        href: treatmentsCase.index(),
+        icon: Syringe,
     },
     {
         title: 'Appointments',
