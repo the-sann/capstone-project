@@ -150,10 +150,13 @@ export function PaginationIconsOnly({ currentPage, lastPage, route,perPage }: Pa
 };
     return (
         <div className="flex items-center justify-start gap-4">
-            <Field orientation="horizontal" className="w-fit">
-                <FieldLabel htmlFor="select-rows-per-page">
-                    Rows per page
-                </FieldLabel>
+            <Field orientation="horizontal" className="w-fit shrink-0">
+    <FieldLabel
+        htmlFor="select-rows-per-page"
+        className="whitespace-nowrap"
+    >
+        Rows per page
+    </FieldLabel>
                 <Select
     value={String(perPage)}
     onValueChange={(value) =>
@@ -170,18 +173,18 @@ export function PaginationIconsOnly({ currentPage, lastPage, route,perPage }: Pa
         )
     }
 >
-    <SelectTrigger className="w-20" id="select-rows-per-page">
+    <SelectTrigger className="w-full" id="select-rows-per-page">
         <SelectValue />
     </SelectTrigger>
 
-    <SelectContent align="start">
-        <SelectGroup>
-            <SelectItem value="5">5</SelectItem>
-            <SelectItem value="25">25</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-            <SelectItem value="100">100</SelectItem>
-        </SelectGroup>
-    </SelectContent>
+    <SelectContent position="popper" side="top" align="start">
+    <SelectGroup>
+        <SelectItem value="5">5</SelectItem>
+        <SelectItem value="25">25</SelectItem>
+        <SelectItem value="50">50</SelectItem>
+        <SelectItem value="100">100</SelectItem>
+    </SelectGroup>
+</SelectContent>
 </Select>
             </Field>
             <Pagination className="mx-0 w-auto">

@@ -37,11 +37,24 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+
             'name' => config('app.name'),
+
             'auth' => [
                 'user' => $request->user(),
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state')
+                || $request->cookie('sidebar_state') === 'true',
+
+            'locale' => app()->getLocale(),
+
+            'translations' => [
+                'welcome' => __('messages.welcome'),
+                'dashboard' => __('messages.dashboard'),
+                'language' => __('messages.language'),
+            ],
+            'test_locale' => app()->getLocale(),
         ];
     }
 }

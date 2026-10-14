@@ -1,10 +1,12 @@
 import { Link } from '@inertiajs/react';
 import {
+    Activity,
     BookOpen,
+    Box,
     CarTaxiFrontIcon,
-    FolderGit2,
     LayoutGrid,
-    User,
+    Syringe,
+    Timer,
     User2,
     UserCircle2,
 } from 'lucide-react';
@@ -25,6 +27,9 @@ import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import dentists from '@/routes/dentists';
 import patients from '@/routes/patients';
+import treatments from '@/routes/treatments';
+import appointments from '@/routes/appointments';
+import treatmentsCase from '@/routes/treatments-case';
 
 const mainNavItems: NavItem[] = [
     {
@@ -43,9 +48,25 @@ const mainNavItems: NavItem[] = [
         icon: User2,
     },
     {
+        title: 'Treatement Case',
+        href: treatmentsCase.index(),
+        icon: Syringe,
+    },
+    {
+        title: 'Appointments',
+        href: appointments.index(),
+        icon: Timer,
+    },
+
+    {
+        title: 'Treatment Services',
+        href: treatments.index(),
+        icon: Activity,
+    },
+    {
         title: 'Materials',
         href: dashboard(),
-        icon: CarTaxiFrontIcon,
+        icon: Box,
     },
 ];
 

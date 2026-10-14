@@ -21,7 +21,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import { PaginationIconsOnly } from '../app/pagination';
+
 
 interface DataTableProps<TData extends RowData> {
     columns: ColumnDef<DataTableFeatures, TData>[];
@@ -47,7 +47,7 @@ export function DataTable<TData extends RowData>({
     });
 
     return (
-        <div className="overflow-hidden rounded-md border">
+        <div className="overflow-auto rounded-md border">
             <Table>
                 <TableHeader>
                     {table.getHeaderGroups().map((headerGroup) => (

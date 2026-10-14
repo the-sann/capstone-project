@@ -60,7 +60,11 @@ export default function Create() {
 Create.layout = {
     breadcrumbs: [
         {
-            title: 'Dentist',
+            title: 'Patients',
+            href: patients.index(),
+        },
+        {
+            title: 'Create',
             href: patients.create(),
         },
     ],
