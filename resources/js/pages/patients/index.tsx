@@ -94,7 +94,7 @@ export default function Index({ patients, filters }: Props) {
         <>
             <Head title="Patient" />
 
-            <div className="flex h-full min-w-0 flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto rounded-xl p-4">
                 {/* Actions */}
                 <div className="flex flex-wrap gap-3">
                     <Link href="/patients/create">
@@ -155,158 +155,171 @@ export default function Index({ patients, filters }: Props) {
                         </ButtonGroup>
                     </Field>
                 </div>
-                {/* Patient Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {patients.data.map((patient) => (
-                        <div
-                            key={patient.id}
-                            className="group rounded-xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-                        >
-                            <Link
-                                href={`/patients/${patient.id}`}
-                                className="block"
+                <div className="flex min-w-0 flex-1 flex-col gap-4">
+                    {/* Patient Grid */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {patients.data.map((patient) => (
+                            <div
+                                key={patient.id}
+                                className="group rounded-xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                             >
-                                {/* Header */}
-                                <div className="mb-4 flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <h3 className="truncate text-lg font-semibold">
-                                            {patient.name}
-                                        </h3>
+                                <Link
+                                    href={`/patients/${patient.id}`}
+                                    className="block"
+                                >
+                                    {/* Header */}
+                                    <div className="mb-4 flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <h3 className="truncate text-lg font-semibold">
+                                                {patient.name}
+                                            </h3>
 
-                                        <p className="text-sm text-muted-foreground">
-                                            ID: {patient.patient_id}
-                                        </p>
-                                    </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                ID: {patient.patient_id}
+                                            </p>
+                                        </div>
 
-                                    {/* Patient Actions */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 shrink-0"
-                                            >
-                                                <Ellipsis className="h-4 w-4" />
-                                                <span className="sr-only">
-                                                    Patient actions
-                                                </span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-
-                                        <DropdownMenuContent
-                                            align="end"
-                                            className="w-40"
-                                        >
-                                            {/* View */}
-                                            <DropdownMenuItem asChild>
-                                                <Link
-                                                    href={`/patients/${patient.id}`}
-                                                    className="flex cursor-pointer items-center"
+                                        {/* Patient Actions */}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 shrink-0"
                                                 >
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View
-                                                </Link>
-                                            </DropdownMenuItem>
+                                                    <Ellipsis className="h-4 w-4" />
+                                                    <span className="sr-only">
+                                                        Patient actions
+                                                    </span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
 
-                                            {/* Edit */}
-                                            <DropdownMenuItem asChild>
-                                                <Link
-                                                    href={`/patients/${patient.id}/edit`}
-                                                    className="flex cursor-pointer items-center"
-                                                >
-                                                    <Pencil className="mr-2 h-4 w-4" />
-                                                    Edit
-                                                </Link>
-                                            </DropdownMenuItem>
-
-                                            <DropdownMenuSeparator />
-
-                                            {/* Delete */}
-                                            <DropdownMenuItem
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    e.preventDefault();
-                                                    deletePatient(patient);
-                                                }}
-                                                className="cursor-pointer text-destructive focus:text-destructive"
+                                            <DropdownMenuContent
+                                                align="end"
+                                                className="w-40"
                                             >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
+                                                {/* View */}
+                                                <DropdownMenuItem asChild>
+                                                    <Link
+                                                        href={`/patients/${patient.id}`}
+                                                        className="flex cursor-pointer items-center"
+                                                    >
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        View
+                                                    </Link>
+                                                </DropdownMenuItem>
 
-                                {/* Patient Information */}
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">
-                                            Age
-                                        </span>
+                                                {/* Edit */}
+                                                <DropdownMenuItem asChild>
+                                                    <Link
+                                                        href={`/patients/${patient.id}/edit`}
+                                                        className="flex cursor-pointer items-center"
+                                                    >
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        Edit
+                                                    </Link>
+                                                </DropdownMenuItem>
 
-                                        <span className="font-medium">
-                                            {patient.age}
-                                        </span>
+                                                <DropdownMenuSeparator />
+
+                                                {/* Delete */}
+                                                <DropdownMenuItem
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        deletePatient(patient);
+                                                    }}
+                                                    className="cursor-pointer text-destructive focus:text-destructive"
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
 
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">
-                                            Gender
-                                        </span>
-
-                                        <span className="font-medium">
-                                            {patient.gender}
-                                        </span>
-                                    </div>
-
-                                    {/* Phone */}
-                                    <div>
-                                        <p className="mb-1 text-muted-foreground">
-                                            Phone
-                                        </p>
-
-                                        <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
-                                            <span className="font-medium">
-                                                {patient.phone}
+                                    {/* Patient Information */}
+                                    <div className="space-y-3 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">
+                                                Age
                                             </span>
 
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 shrink-0"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    e.preventDefault();
-                                                    copyPhone(patient.phone);
-                                                }}
-                                            >
-                                                {copiedPhone ===
-                                                patient.phone ? (
-                                                    <Check className="h-4 w-4" />
-                                                ) : (
-                                                    <Copy className="h-4 w-4" />
-                                                )}
-                                            </Button>
+                                            <span className="font-medium">
+                                                {patient.age}
+                                            </span>
                                         </div>
-                                    </div>
 
-                                    {/* Address */}
-                                    {patient.address && (
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">
+                                                Gender
+                                            </span>
+
+                                            <span className="font-medium">
+                                                {patient.gender}
+                                            </span>
+                                        </div>
+
+                                        {/* Phone */}
                                         <div>
-                                            <p className="text-muted-foreground">
-                                                Address
+                                            <p className="mb-1 text-muted-foreground">
+                                                Phone
                                             </p>
 
-                                            <p className="mt-1 line-clamp-2">
-                                                {patient.address}
-                                            </p>
+                                            <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
+                                                <span className="font-medium">
+                                                    {patient.phone}
+                                                </span>
+
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 shrink-0"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        copyPhone(
+                                                            patient.phone,
+                                                        );
+                                                    }}
+                                                >
+                                                    {copiedPhone ===
+                                                    patient.phone ? (
+                                                        <Check className="h-4 w-4" />
+                                                    ) : (
+                                                        <Copy className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            </Link>
-                        </div>
-                    ))}
+
+                                        {/* Address */}
+                                        {patient.address && (
+                                            <div>
+                                                <p className="text-muted-foreground">
+                                                    Address
+                                                </p>
+
+                                                <p className="mt-1 line-clamp-2">
+                                                    {patient.address}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                    {/* Pagination */}
+                    <div className="w-full min-w-0 overflow-x-auto">
+                        <PaginationIconsOnly
+                            currentPage={patients.current_page}
+                            lastPage={patients.last_page}
+                            route={patientRoutes.index().url}
+                            perPage={patients.per_page}
+                        />
+                    </div>
                 </div>
 
                 {/* Empty State */}
@@ -317,14 +330,6 @@ export default function Index({ patients, filters }: Props) {
                         </p>
                     </div>
                 )}
-
-                {/* Pagination */}
-                <PaginationIconsOnly
-                    currentPage={patients.current_page}
-                    lastPage={patients.last_page}
-                    route={patientRoutes.index().url}
-                    perPage={patients.per_page}
-                />
             </div>
         </>
     );

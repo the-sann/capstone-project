@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import payments from '@/routes/payments';
 import { Link } from '@inertiajs/react';
 import treatmentCaseRoutes from '@/routes/treatments-case';
+import { Printer } from 'lucide-react';
+import invoices from '@/routes/invoices';
 
 type InvoiceItem = {
     id: number;
@@ -128,6 +130,12 @@ export default function Show({ invoice }: Props) {
                                 </Button>
                             )}
                     </span>
+                    <Button asChild variant="outline">
+                        <Link href={invoices.print(invoice.id)}>
+                            <Printer className="mr-2 h-4 w-4" />
+                            Print Invoice
+                        </Link>
+                    </Button>
                 </div>
 
                 {/* Patient & Treatment Case */}

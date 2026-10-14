@@ -21,8 +21,8 @@ class Payment extends Model
         'paid_at' => 'datetime',
     ];
 
-    public function invoice(): BelongsTo
+    public function invoice()
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Invoice::class, 'invoice_id');
     }
 }

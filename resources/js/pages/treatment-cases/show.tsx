@@ -72,6 +72,13 @@ type Appointment = {
     appointment_time: string;
     status: string;
 };
+type Payment = {
+    id: number;
+    payment_id: string;
+    amount: string;
+    payment_date: string;
+};
+
 type Invoice = {
     id: number;
     invoice_id: string;
@@ -79,6 +86,7 @@ type Invoice = {
     paid_amount: string;
     balance_amount: string;
     status: 'unpaid' | 'partial' | 'paid' | 'cancelled';
+    payments: Payment[];
 };
 type TreatmentCase = {
     id: number;
@@ -176,6 +184,10 @@ export default function Show({ treatmentCase }: Props) {
     const completedItems = treatmentCase.items.filter(
         (item) => item.status === 'completed',
     ).length;
+    const isCompleted = treatmentCase.status === 'completed';
+    const canCreateBilling =
+        treatmentCase.items.length > 0 &&
+        Number(treatmentCase.total_amount) > 0;
 
     return (
         <>
@@ -211,36 +223,77 @@ export default function Show({ treatmentCase }: Props) {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         {!treatmentCase.invoice ? (
-                            <Button asChild>
-                                <Link href={invoices.create(treatmentCase.id)}>
-                                    Create Invoice
-                                </Link>
-                            </Button>
-                        ) : treatmentCase.invoice.status !== 'paid' &&
-                          treatmentCase.invoice.status !== 'cancelled' ? (
+                            treatmentCase.items.length > 0 &&
+                            Number(treatmentCase.total_amount) > 0 ? (
+                                <Button asChild>
+                                    <Link
+                                        href={invoices.create(treatmentCase.id)}
+                                    >
+                                        Create Invoice
+                                    </Link>
+                                </Button>
+                            ) : null
+                        ) : (
+                            <>
+                                <Button asChild variant="outline">
+                                    <Link
+                                        href={
+                                            invoices.show(
+                                                treatmentCase.invoice.id,
+                                            ).url
+                                        }
+                                    >
+                                        View Invoice
+                                    </Link>
+                                </Button>
+
+                                {Number(treatmentCase.invoice.balance_amount) >
+                                    0 && (
+                                    <Button asChild>
+                                        <Link
+                                            href={
+                                                payments.create(
+                                                    treatmentCase.invoice.id,
+                                                ).url
+                                            }
+                                        >
+                                            Add Payment
+                                        </Link>
+                                    </Button>
+                                )}
+
+                                {treatmentCase.invoice.payments.length > 0 && (
+                                    <Button asChild variant="outline">
+                                        <Link
+                                            href={
+                                                payments.show(
+                                                    treatmentCase.invoice
+                                                        .payments[
+                                                        treatmentCase.invoice
+                                                            .payments.length - 1
+                                                    ].id,
+                                                ).url
+                                            }
+                                        >
+                                            View Payment
+                                        </Link>
+                                    </Button>
+                                )}
+                            </>
+                        )}
+
+                        {treatmentCase.status === 'ongoing' && (
                             <Button asChild>
                                 <Link
-                                    href={
-                                        payments.create(
-                                            treatmentCase.invoice.id,
-                                        ).url
-                                    }
+                                    href={treatmentCaseRoutes.edit(
+                                        treatmentCase.id,
+                                    )}
                                 >
-                                    Add Payment
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit Case
                                 </Link>
                             </Button>
-                        ) : null}
-
-                        <Button asChild>
-                            <Link
-                                href={treatmentCaseRoutes.edit(
-                                    treatmentCase.id,
-                                )}
-                            >
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit Case
-                            </Link>
-                        </Button>
+                        )}
                     </div>
                 </div>
 
@@ -337,7 +390,6 @@ export default function Show({ treatmentCase }: Props) {
                             <CardDescription>Total Amount</CardDescription>
 
                             <CardTitle className="flex items-center gap-2 text-2xl">
-                                <DollarSign className="h-5 w-5" />
                                 {formatCurrency(treatmentCase.total_amount)}
                             </CardTitle>
                         </CardHeader>
@@ -387,17 +439,18 @@ export default function Show({ treatmentCase }: Props) {
                                 Services included in this treatment case
                             </CardDescription>
                         </div>
-
-                        <Button asChild>
-                            <Link
-                                href={treatmentsCaseItems.create(
-                                    treatmentCase.id,
-                                )}
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add Treatment
-                            </Link>
-                        </Button>
+                        {!isCompleted && (
+                            <Button asChild>
+                                <Link
+                                    href={treatmentsCaseItems.create(
+                                        treatmentCase.id,
+                                    )}
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Treatment
+                                </Link>
+                            </Button>
+                        )}
                     </CardHeader>
 
                     <CardContent>
@@ -506,81 +559,85 @@ export default function Show({ treatmentCase }: Props) {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-4 text-right">
-                                                        <div className="flex justify-end gap-1">
-                                                            {item.status !==
-                                                                'completed' && (
+                                                        {!isCompleted && (
+                                                            <div className="flex justify-end gap-1">
+                                                                {item.status !==
+                                                                    'completed' && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="text-emerald-600 hover:text-emerald-600"
+                                                                        onClick={() => {
+                                                                            if (
+                                                                                !confirm(
+                                                                                    'Are you sure you want to complete this treatment item?',
+                                                                                )
+                                                                            ) {
+                                                                                return;
+                                                                            }
+
+                                                                            router.patch(
+                                                                                treatmentsCaseItems.complete(
+                                                                                    {
+                                                                                        treatmentCase:
+                                                                                            treatmentCase.id,
+                                                                                        item: item.id,
+                                                                                    },
+                                                                                ),
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        <Check className="mr-2 h-4 w-4" />
+                                                                        Complete
+                                                                    </Button>
+                                                                )}
+
+                                                                <Button
+                                                                    asChild
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                >
+                                                                    <Link
+                                                                        href={treatmentsCaseItems.edit(
+                                                                            {
+                                                                                treatmentCase:
+                                                                                    treatmentCase.id,
+                                                                                item: item.id,
+                                                                            },
+                                                                        )}
+                                                                    >
+                                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                                        Edit
+                                                                    </Link>
+                                                                </Button>
+
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="text-emerald-600 hover:text-emerald-600"
+                                                                    className="text-destructive hover:text-destructive"
                                                                     onClick={() => {
                                                                         if (
-                                                                            !confirm(
-                                                                                'Are you sure you want to complete this treatment item?',
+                                                                            confirm(
+                                                                                'Are you sure you want to delete this treatment item?',
                                                                             )
                                                                         ) {
-                                                                            return;
+                                                                            router.delete(
+                                                                                treatmentsCaseItems.destroy(
+                                                                                    {
+                                                                                        treatmentCase:
+                                                                                            treatmentCase.id,
+                                                                                        item: item.id,
+                                                                                    },
+                                                                                ),
+                                                                            );
                                                                         }
-
-                                                                        router.patch(
-                                                                            treatmentsCaseItems.complete(
-                                                                                {
-                                                                                    treatmentCase:
-                                                                                        treatmentCase.id,
-                                                                                    item: item.id,
-                                                                                },
-                                                                            ),
-                                                                        );
                                                                     }}
                                                                 >
-                                                                    <Check className="mr-2 h-4 w-4" />
-                                                                    Complete
+                                                                    <Trash className="mr-2 h-4 w-4" />
+                                                                    Delete
                                                                 </Button>
-                                                            )}
-                                                            <Button
-                                                                asChild
-                                                                variant="ghost"
-                                                                size="sm"
-                                                            >
-                                                                <Link
-                                                                    href={treatmentsCaseItems.edit(
-                                                                        {
-                                                                            treatmentCase:
-                                                                                treatmentCase.id,
-                                                                            item: item.id,
-                                                                        },
-                                                                    )}
-                                                                >
-                                                                    <Pencil className="mr-2 h-4 w-4" />
-                                                                    Edit
-                                                                </Link>
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-destructive hover:text-destructive"
-                                                                onClick={() => {
-                                                                    if (
-                                                                        confirm(
-                                                                            'Are you sure you want to delete this treatment item?',
-                                                                        )
-                                                                    ) {
-                                                                        router.delete(
-                                                                            treatmentsCaseItems.destroy(
-                                                                                {
-                                                                                    treatmentCase:
-                                                                                        treatmentCase.id,
-                                                                                    item: item.id,
-                                                                                },
-                                                                            ),
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Trash className="mr-2 h-4 w-4" />
-                                                                Delete
-                                                            </Button>
-                                                        </div>
+                                                            </div>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             ),
@@ -625,16 +682,18 @@ export default function Show({ treatmentCase }: Props) {
                             </CardDescription>
                         </div>
 
-                        <Button asChild>
-                            <Link
-                                href={treatmentsCaseAppointments.create(
-                                    treatmentCase.id,
-                                )}
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Make Appointment
-                            </Link>
-                        </Button>
+                        {!isCompleted && canCreateBilling && (
+                            <Button asChild>
+                                <Link
+                                    href={treatmentsCaseAppointments.create(
+                                        treatmentCase.id,
+                                    )}
+                                >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Make Appointment
+                                </Link>
+                            </Button>
+                        )}
                     </CardHeader>
 
                     <CardContent>

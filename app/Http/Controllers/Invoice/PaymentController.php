@@ -10,6 +10,18 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
+
+    public function print(Payment $payment)
+    {
+        $payment->load([
+            'invoice.treatmentCase.patient',
+            'invoice.treatmentCase.dentist',
+        ]);
+
+        return inertia('payments/print', [
+            'payment' => $payment,
+        ]);
+    }
     public function create(Invoice $invoice)
     {
         $invoice->load([
@@ -41,8 +53,10 @@ class PaymentController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($invoice, $validated) {
-            Payment::create([
+        $payment = DB::transaction(function () use ($invoice, $validated) {
+
+            // Create payment ONCE
+            $payment = Payment::create([
                 'payment_id' => 'PAY-' . str_pad(
                     (Payment::max('id') ?? 0) + 1,
                     4,
@@ -56,6 +70,7 @@ class PaymentController extends Controller
                 'paid_at' => now(),
             ]);
 
+            // Calculate invoice amounts
             $paidAmount = $invoice->paid_amount + $validated['amount'];
             $balanceAmount = $invoice->total_amount - $paidAmount;
 
@@ -65,15 +80,49 @@ class PaymentController extends Controller
                 default => 'unpaid',
             };
 
+            // Update invoice
             $invoice->update([
                 'paid_amount' => $paidAmount,
-                'balance_amount' => $balanceAmount,
+                'balance_amount' => max(0, $balanceAmount),
                 'status' => $status,
             ]);
+
+            // Update treatment case
+            $treatmentCase = $invoice->treatmentCase;
+
+            $treatmentCase->update([
+                'paid_amount' => $paidAmount,
+                'balance_amount' => max(0, $balanceAmount),
+            ]);
+
+            // Check treatment completion
+            $hasIncompleteItems = $treatmentCase
+                ->items()
+                ->where('status', '!=', 'completed')
+                ->exists();
+
+            if (!$hasIncompleteItems && $treatmentCase->balance_amount <= 0) {
+                $treatmentCase->update([
+                    'status' => 'completed',
+                ]);
+            }
+
+            return $payment;
         });
 
         return redirect()
-            ->route('invoices.show', $invoice)
+            ->route('payments.show', $payment)
             ->with('success', 'Payment added successfully.');
+    }
+    public function show(Payment $payment)
+    {
+        $payment->load([
+            'invoice.treatmentCase.patient',
+            'invoice.treatmentCase.dentist',
+        ]);
+
+        return inertia('payments/show', [
+            'payment' => $payment,
+        ]);
     }
 }

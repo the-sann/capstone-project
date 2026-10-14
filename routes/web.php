@@ -34,12 +34,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('treatments-case/{treatmentCase}/items/{item}/edit', [TreatmentCaseItemController::class, 'edit'])->name('treatments-case-items.edit');
     Route::delete('treatments-case/{treatmentCase}/items/{item}', [TreatmentCaseItemController::class, 'destroy'])->name('treatments-case-items.destroy');
     Route::get('treatments-case/{treatmentCase}/appointments/create', [AppointmentController::class, 'createForTreatmentCase'])->name('treatments-case.appointments.create');
+    Route::put('treatments-case/{treatmentCase}/items/{item}', [TreatmentCaseItemController::class, 'update'])->name('treatments-case-items.update');
     Route::patch('treatments-case/{treatmentCase}/items/{item}/complete', [TreatmentCaseItemController::class, 'complete'])->name('treatments-case-items.complete');
     Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('treatment-cases/{treatmentCase}/invoice/create', [InvoiceController::class, 'create'])->name('invoices.create');
     Route::post('treatment-cases/{treatmentCase}/invoice', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('invoices/{invoice}/payment/create', [PaymentController::class, 'create'])->name('payments.create');
     Route::post('invoices/{invoice}/payment', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
+    Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
     Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 });
 

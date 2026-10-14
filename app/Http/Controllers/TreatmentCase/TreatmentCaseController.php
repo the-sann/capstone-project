@@ -171,14 +171,12 @@ class TreatmentCaseController extends Controller
             'items.treatmentService',
             'appointments',
             'invoice',
+            'invoice.payments',
         ]);
 
-        return inertia(
-            'treatment-cases/show',
-            [
-                'treatmentCase' => $treatmentCase,
-            ]
-        );
+        return inertia('treatment-cases/show', [
+            'treatmentCase' => $treatmentCase,
+        ]);
     }
 
 

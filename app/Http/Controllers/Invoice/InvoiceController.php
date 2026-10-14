@@ -9,6 +9,21 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
+    public function print(Invoice $invoice)
+    {
+        $invoice->load([
+            'treatmentCase.patient',
+            'treatmentCase.dentist',
+            'items.treatmentService',
+            'payments' => function ($query) {
+                $query->orderBy('paid_at', 'asc');
+            },
+        ]);
+
+        return inertia('invoices/print', [
+            'invoice' => $invoice,
+        ]);
+    }
     /**
      * Create an invoice from a treatment case.
      */
@@ -38,18 +53,35 @@ class InvoiceController extends Controller
                 ->with('info', 'Invoice already exists for this treatment case.');
         }
 
-        $invoice = DB::transaction(function () use ($treatmentCase) {
+        // Load treatment items
+        $treatmentCase->load([
+            'items.treatmentService',
+        ]);
 
-            $treatmentCase->load([
-                'items.treatmentService',
-            ]);
+        // Prevent invoice with no treatment items
+        if ($treatmentCase->items->isEmpty()) {
+            return back()
+                ->with('error', 'Cannot create invoice because this treatment case has no treatment items.');
+        }
 
-            $subtotal = $treatmentCase->items->sum('total_price');
+        // Calculate total
+        $subtotal = $treatmentCase->items->sum('total_price');
 
-            $discount = 0;
+        // Prevent invoice with $0 total
+        if ($subtotal <= 0) {
+            return back()
+                ->with('error', 'Cannot create invoice because the total amount is $0.');
+        }
 
-            $total = $subtotal - $discount;
+        $discount = 0;
+        $total = $subtotal - $discount;
 
+        $invoice = DB::transaction(function () use (
+            $treatmentCase,
+            $subtotal,
+            $discount,
+            $total
+        ) {
             $invoice = Invoice::create([
                 'invoice_id' => 'INV-' . str_pad(
                     (Invoice::max('id') ?? 0) + 1,
@@ -71,7 +103,6 @@ class InvoiceController extends Controller
             ]);
 
             foreach ($treatmentCase->items as $item) {
-
                 $invoice->items()->create([
                     'treatment_service_id' => $item->treatment_service_id,
 
