@@ -117,6 +117,7 @@ class PaymentController extends Controller
     public function show(Payment $payment)
     {
         $payment->load([
+            'invoice.payments',
             'invoice.treatmentCase.patient',
             'invoice.treatmentCase.dentist',
         ]);

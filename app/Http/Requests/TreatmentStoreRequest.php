@@ -26,7 +26,7 @@ class TreatmentStoreRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
+            'duration' => 'nullable|integer|min:1',
             'status' => 'required|in:available,unavailable',
         ];
     }

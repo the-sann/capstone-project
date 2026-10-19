@@ -130,12 +130,14 @@ export default function Show({ invoice }: Props) {
                                 </Button>
                             )}
                     </span>
-                    <Button asChild variant="outline">
-                        <Link href={invoices.print(invoice.id)}>
-                            <Printer className="mr-2 h-4 w-4" />
-                            Print Invoice
-                        </Link>
-                    </Button>
+                    {invoice.payments?.length > 0 && (
+                        <Button asChild variant="outline">
+                            <Link href={invoices.print(invoice.id).url}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                Print Invoice
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Patient & Treatment Case */}
@@ -297,7 +299,7 @@ export default function Show({ invoice }: Props) {
                 </div>
 
                 {/* Payments */}
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle>Payments</CardTitle>
                     </CardHeader>
@@ -362,7 +364,7 @@ export default function Show({ invoice }: Props) {
                             </div>
                         )}
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
         </>
     );
@@ -373,6 +375,7 @@ Show.layout = {
             title: 'Treatment Cases',
             href: treatmentCaseRoutes.index(),
         },
+
         {
             title: 'Invoice Details',
             href: '#',

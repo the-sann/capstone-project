@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('patient_id')->unique();
             $table->string('name');
-            $table->unsignedInteger('age');
+            $table->unsignedInteger('age')->nullable();
             $table->string('gender');
             $table->string('phone');
             $table->string('address')->nullable();

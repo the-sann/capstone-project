@@ -25,7 +25,7 @@ class PatientStoreRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'age' => ['required', 'integer', 'min:5', 'max:100'],
+            'age' => ['nullable', 'integer', 'min:5', 'max:100'],
             'gender' => 'required|string|max:20|in:male,female',
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
