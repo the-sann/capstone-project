@@ -71,12 +71,39 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        return inertia(
-            'patients/show',
-            [
-                'patient' => $patient
-            ]
-        );
+        $patient->load([
+            'appointments.dentist',
+            'treatmentCases.dentist',
+            'treatmentCases.items.treatmentService',
+            'treatmentCases.invoice.payments',
+        ]);
+
+        $treatmentCases = $patient->treatmentCases();
+
+        $summary = [
+            'total_appointments' => $patient->appointments()->count(),
+            'open_appointments' => $patient->appointments()
+                ->where('status', 'open')->count(),
+            'closed_appointments' => $patient->appointments()
+                ->where('status', 'closed')->count(),
+
+            'total_treatment_cases' => (clone $treatmentCases)->count(),
+            'ongoing_cases' => (clone $treatmentCases)
+                ->where('status', 'ongoing')->count(),
+            'completed_cases' => (clone $treatmentCases)
+                ->where('status', 'completed')->count(),
+            'cancelled_cases' => (clone $treatmentCases)
+                ->where('status', 'cancelled')->count(),
+
+            'total_cost' => (clone $treatmentCases)->sum('total_amount'),
+            'outstanding_balance' => (clone $treatmentCases)
+                ->sum('balance_amount'),
+        ];
+
+        return inertia('patients/show', [
+            'patient' => $patient,
+            'summary' => $summary,
+        ]);
     }
 
     /**

@@ -5,6 +5,7 @@ import {
     Box,
     CarTaxiFrontIcon,
     LayoutGrid,
+    Receipt,
     Syringe,
     Timer,
     User2,
@@ -67,6 +68,11 @@ const mainNavItems: NavItem[] = [
         title: 'Materials',
         href: dashboard(),
         icon: Box,
+    },
+    {
+        title: 'Loan Patients',
+        href: dashboard(),
+        icon: Receipt,
     },
 ];
 

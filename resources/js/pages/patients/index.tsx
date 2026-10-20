@@ -110,13 +110,6 @@ export default function Index({ patients, filters }: Props) {
                             Create Treatment Case
                         </Button>
                     </Link>
-
-                    <div>
-                        <Button variant="outline" className="gap-2">
-                            <Download />
-                            Export Patients
-                        </Button>
-                    </div>
                 </div>
                 <div className="w-full max-w-sm">
                     <Field>

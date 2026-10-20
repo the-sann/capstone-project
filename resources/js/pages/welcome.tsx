@@ -31,6 +31,9 @@ export default function Welcome() {
                 </header>
                 <main>
                     <h1>Welcome Back</h1>
+                    <div>
+                        <img src="img.png" alt="" className="h-64" />
+                    </div>
                 </main>
 
                 <div className="hidden h-14.5 lg:block"></div>

@@ -16,8 +16,10 @@ class TreatmentCaseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->query('status');
+
         $cases = TreatmentCase::with([
             'patient:id,name,patient_id',
             'dentist:id,name',
@@ -26,11 +28,19 @@ class TreatmentCaseController extends Controller
                 'items',
                 'appointments',
             ])
+            ->when(
+                in_array($status, ['ongoing', 'completed', 'cancelled']),
+                fn($query) => $query->where('status', $status)
+            )
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return inertia('treatment-cases/index', [
             'cases' => $cases,
+            'filters' => [
+                'status' => $status,
+            ],
         ]);
     }
 

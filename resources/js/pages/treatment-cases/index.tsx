@@ -10,6 +10,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { router } from '@inertiajs/react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 import treatmentCaseRoutes from '@/routes/treatments-case';
 
@@ -53,6 +61,9 @@ type PaginatedCases = {
 
 type Props = {
     cases: PaginatedCases;
+    filters: {
+        status: string | null;
+    };
 };
 
 function formatCurrency(value: number | string) {
@@ -89,7 +100,7 @@ function formatStatus(status: string) {
         .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export default function TreatmentCaseIndex({ cases }: Props) {
+export default function TreatmentCaseIndex({ cases, filters }: Props) {
     return (
         <>
             <Head title="Treatment Cases" />
@@ -113,6 +124,35 @@ export default function TreatmentCaseIndex({ cases }: Props) {
                             New Treatment Case
                         </Link>
                     </Button>
+                </div>
+                <div className="flex justify-end">
+                    <Select
+                        value={filters.status || 'all'}
+                        onValueChange={(value) => {
+                            router.get(
+                                treatmentCaseRoutes.index().url,
+                                {
+                                    status: value === 'all' ? undefined : value,
+                                },
+                                {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                    replace: true,
+                                },
+                            );
+                        }}
+                    >
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="ongoing">Ongoing</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 {/* Table */}
