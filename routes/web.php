@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Appointment\AppointmentController;
+use App\Http\Controllers\dashboard\DashboardController;
 use App\Http\Controllers\Dentists\DentistController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Invoice\PaymentController;
@@ -15,7 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
     Route::resource('dentists', DentistController::class);
     Route::resource('patients', PatientController::class);
     Route::resource('treatments', TreatmentController::class);
@@ -44,6 +48,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
     Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::inertia('/materials', 'materials/index')->name('materials.index');
+    Route::inertia('/loans', 'loans/index')->name('loans.index');
     Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 });
 

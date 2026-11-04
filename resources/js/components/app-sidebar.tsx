@@ -31,6 +31,8 @@ import patients from '@/routes/patients';
 import treatments from '@/routes/treatments';
 import appointments from '@/routes/appointments';
 import treatmentsCase from '@/routes/treatments-case';
+import materials from '@/routes/materials';
+import loans from '@/routes/loans';
 
 const mainNavItems: NavItem[] = [
     {
@@ -66,12 +68,12 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Materials',
-        href: dashboard(),
+        href: materials.index(),
         icon: Box,
     },
     {
         title: 'Loan Patients',
-        href: dashboard(),
+        href: loans.index(),
         icon: Receipt,
     },
 ];

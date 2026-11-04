@@ -1,11 +1,26 @@
-import { Head } from '@inertiajs/react';
 // import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { usePage } from '@inertiajs/react';
 import { dashboard } from '@/routes';
 import RevenueChart from '@/components/app/chart';
+import { Head, usePage } from '@inertiajs/react';
+import type { PageProps } from '@inertiajs/core';
+interface RevenueRange {
+    labels: string[];
+    values: number[];
+}
+
+interface DashboardProps extends PageProps {
+    translations: {
+        welcome: string;
+        dashboard: string;
+    };
+    revenueRanges: {
+        '6m': RevenueRange;
+        '12m': RevenueRange;
+    };
+}
 
 export default function Dashboard() {
-    const { translations } = usePage().props as any;
+    const { translations, revenueRanges } = usePage<DashboardProps>().props;
 
     return (
         <>
@@ -29,7 +44,7 @@ export default function Dashboard() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1>{translations.welcome}</h1>
                 <p>{translations.dashboard}</p>
-                <RevenueChart />
+                <RevenueChart revenueRanges={revenueRanges} />
             </div>
         </>
     );

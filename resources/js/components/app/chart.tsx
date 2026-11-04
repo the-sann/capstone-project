@@ -2,38 +2,51 @@ import { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { useAppearance } from '@/hooks/use-appearance';
 
-const REVENUE_RANGES_BY_PERIOD = {
-    '6m': {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        values: [28000, 34000, 31000, 39000, 42000, 48000],
-    },
-    '12m': {
-        labels: [
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-        ],
-        values: [
-            19000, 21500, 20000, 23500, 25000, 27000, 28000, 34000, 31000,
-            39000, 42000, 48000,
-        ],
-    },
-};
+// const REVENUE_RANGES_BY_PERIOD = {
+//     '6m': {
+//         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+//         values: [28000, 34000, 31000, 39000, 42000, 48000],
+//     },
+//     '12m': {
+//         labels: [
+//             'Jul',
+//             'Aug',
+//             'Sep',
+//             'Oct',
+//             'Nov',
+//             'Dec',
+//             'Jan',
+//             'Feb',
+//             'Mar',
+//             'Apr',
+//             'May',
+//             'Jun',
+//         ],
+//         values: [
+//             19000, 21500, 20000, 23500, 25000, 27000, 28000, 34000, 31000,
+//             39000, 42000, 48000,
+//         ],
+//     },
+// };
 
-export default function RevenueChart() {
+interface RevenueRange {
+    labels: string[];
+    values: number[];
+}
+
+interface RevenueChartProps {
+    revenueRanges: {
+        '6m': RevenueRange;
+        '12m': RevenueRange;
+    };
+}
+
+type RangeKey = '6m' | '12m';
+export default function RevenueChart({ revenueRanges }: RevenueChartProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const chartRef = useRef<Chart | null>(null);
 
-    const [selectedRange, setSelectedRange] = useState('6m');
+    const [selectedRange, setSelectedRange] = useState<RangeKey>('6m');
 
     const { appearance } = useAppearance();
 
@@ -94,36 +107,24 @@ export default function RevenueChart() {
             type: 'line',
 
             data: {
-                labels: REVENUE_RANGES_BY_PERIOD[
-                    selectedRange as keyof typeof REVENUE_RANGES_BY_PERIOD
-                ].labels,
+                labels: revenueRanges[selectedRange].labels,
 
                 datasets: [
                     {
                         label: 'Revenue',
-
-                        data: REVENUE_RANGES_BY_PERIOD[
-                            selectedRange as keyof typeof REVENUE_RANGES_BY_PERIOD
-                        ].values,
-
+                        data: revenueRanges[selectedRange].values,
                         borderColor: '#4f46e5',
-
                         backgroundColor: revenueFillGradient,
-
                         borderWidth: 2,
 
-                        pointRadius: 0,
-
-                        pointHoverRadius: 5,
-
-                        pointHoverBackgroundColor: '#4f46e5',
-
-                        pointHoverBorderColor: isDark ? '#111827' : '#ffffff',
-
-                        pointHoverBorderWidth: 2,
+                        // Show points even when revenue is small.
+                        pointRadius: 4,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: '#4f46e5',
+                        pointBorderColor: isDark ? '#111827' : '#ffffff',
+                        pointBorderWidth: 2,
 
                         tension: 0.35,
-
                         fill: true,
                     },
                 ],
@@ -172,19 +173,16 @@ export default function RevenueChart() {
                             color: textColor,
                         },
                     },
-
                     y: {
                         beginAtZero: true,
-
                         grid: {
                             color: gridColor,
                         },
-
                         ticks: {
                             color: textColor,
-
+                            maxTicksLimit: 10,
                             callback: (tickValue) =>
-                                `$${Number(tickValue) / 1000}k`,
+                                `$${Number(tickValue).toLocaleString()}`,
                         },
                     },
                 },
@@ -195,12 +193,9 @@ export default function RevenueChart() {
             chartRef.current?.destroy();
             chartRef.current = null;
         };
-    }, [isDark, selectedRange]);
+    }, [isDark, selectedRange, revenueRanges]);
 
-    const { labels, values } =
-        REVENUE_RANGES_BY_PERIOD[
-            selectedRange as keyof typeof REVENUE_RANGES_BY_PERIOD
-        ];
+    const { labels, values } = revenueRanges[selectedRange];
 
     return (
         <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
@@ -210,7 +205,7 @@ export default function RevenueChart() {
                 </h2>
 
                 <div className="inline-flex rounded-md border border-gray-200 p-0.5 text-xs font-medium dark:border-gray-700">
-                    {Object.keys(REVENUE_RANGES_BY_PERIOD).map((rangeKey) => {
+                    {(['6m', '12m'] as const).map((rangeKey) => {
                         const isSelected = rangeKey === selectedRange;
 
                         return (
@@ -251,10 +246,9 @@ export default function RevenueChart() {
                 </thead>
 
                 <tbody>
-                    {labels.map((monthLabel, index) => (
-                        <tr key={monthLabel}>
+                    {labels.map((monthLabel: string, index: number) => (
+                        <tr key={`${monthLabel}-${index}`}>
                             <th scope="row">{monthLabel}</th>
-
                             <td>${values[index].toLocaleString()}</td>
                         </tr>
                     ))}

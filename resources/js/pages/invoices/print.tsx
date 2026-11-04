@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { toPng } from 'html-to-image';
+import { jsPDF } from 'jspdf';
+import { useRef, useState } from 'react';
 import treatmentCaseRoutes from '@/routes/treatments-case';
 
 type Patient = {
@@ -53,356 +55,424 @@ type Props = {
     invoice: Invoice;
 };
 
-/**
- * All positions below are in millimetres, measured from the top-left corner
- * of the A5 sheet (148 x 210 mm). They were estimated from a photo of the
- * pad, so use the X / Y offset controls on screen to fine-tune after a
- * test print. The offsets are saved in this browser.
- */
-const ROWS_PER_PAGE = 14;
-const FIRST_ROW_TOP = 72.5; // top of text in row 1
-const ROW_PITCH = 7.52; // distance between rows
-const ROW_HEIGHT = 7; // text box height of a row
+// Number of rows printed on the pad
+const MIN_ROWS = 14;
 
-const COL = {
-    desc: { left: 20, width: 50 },
-    qty: { left: 71, width: 12 },
-    price: { left: 83, width: 16 },
-    appt: { left: 100, width: 22 },
-    total: { left: 123, width: 16 },
-};
-
-const HEADER = {
-    // System invoice ID, printed just below the pad's red serial number
-    invoiceId: { left: 107, top: 30.5, width: 34 },
-    name: { left: 36, top: 31.5, width: 100 },
-    sex: { left: 22, top: 38.5, width: 25 },
-    age: { left: 54, top: 38.5, width: 20 },
-    tel: { left: 22, top: 46, width: 60 },
-    day: { left: 24, top: 53.5 },
-    month: { left: 41, top: 53.5 },
-    year: { left: 55, top: 53.5 },
-};
-
-const SUMMARY = {
-    note: { left: 33, top: 177, width: 68 },
-    total: { left: 127, top: 178.5, width: 16 },
-    deposit: { left: 127, top: 185.5, width: 16 },
-    balance: { left: 127, top: 192, width: 16 },
-};
-
-const STORAGE_KEY = 'invoice-print-offset';
-
-function chunk<T>(list: T[], size: number): T[][] {
-    if (list.length === 0) return [[]];
-    const pages: T[][] = [];
-    for (let i = 0; i < list.length; i += size) {
-        pages.push(list.slice(i, i + size));
-    }
-    return pages;
-}
+const INK = '#2d4a9b'; // blue ink used on the pad
+const RED = '#c8201f'; // pad serial number
 
 export default function InvoicePrint({ invoice }: Props) {
-    const [offsetX, setOffsetX] = useState(0);
-    const [offsetY, setOffsetY] = useState(0);
-    const [showGuides, setShowGuides] = useState(false);
-
-    // Load saved offsets
-    useEffect(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                const { x, y } = JSON.parse(saved);
-                setOffsetX(Number(x) || 0);
-                setOffsetY(Number(y) || 0);
-            }
-        } catch {
-            // storage unavailable, use defaults
-        }
-    }, []);
-
-    const saveOffsets = (x: number, y: number) => {
-        setOffsetX(x);
-        setOffsetY(y);
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ x, y }));
-        } catch {
-            // ignore
-        }
-    };
-
     const money = (value: number | string) =>
         Number(value).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         });
 
-    const date = new Date(invoice.created_at);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear());
-
-    const formatDate = (value: string) =>
-        new Date(value).toLocaleDateString('en-GB', {
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString('en-GB', {
             day: '2-digit',
             month: '2-digit',
-            year: '2-digit',
+            year: 'numeric',
         });
 
     const patient = invoice.treatment_case.patient;
-    const pages = chunk(invoice.items, ROWS_PER_PAGE);
+    const items = invoice.items;
+    const emptyRows = Math.max(0, MIN_ROWS - items.length);
     const hasDiscount = Number(invoice.discount) > 0;
 
-    // Shared style for every absolutely positioned value
-    const place = (
-        pos: { left: number; top: number; width?: number },
-        extra: React.CSSProperties = {},
-    ): React.CSSProperties => ({
-        position: 'absolute',
-        left: `${pos.left}mm`,
-        top: `${pos.top}mm`,
-        width: pos.width ? `${pos.width}mm` : undefined,
-        whiteSpace: 'nowrap',
-        ...extra,
-    });
+    // ---- Export (PDF / image / share) ----
+    const sheetRef = useRef<HTMLDivElement>(null);
+    const [busy, setBusy] = useState(false);
 
-    const guide = showGuides
-        ? 'outline outline-1 outline-dashed outline-red-400 print:outline-none'
-        : '';
+    const fileName = `Invoice-${invoice.invoice_id}`.replace(
+        /[^a-zA-Z0-9-_]/g,
+        '_',
+    );
+
+    // Render the A5 sheet to a high-resolution PNG (Khmer text included)
+    const capture = async () => {
+        if (!sheetRef.current) throw new Error('Invoice not ready');
+
+        return toPng(sheetRef.current, {
+            pixelRatio: 3,
+            backgroundColor: '#ffffff',
+            cacheBust: true,
+            // Remove the on-screen shadow / centering margin from the export
+            style: { margin: '0', boxShadow: 'none' },
+        });
+    };
+
+    const saveFile = (href: string, name: string) => {
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = name;
+        link.click();
+    };
+
+    const run = async (action: () => Promise<void>) => {
+        setBusy(true);
+        try {
+            await action();
+        } catch (error) {
+            // User cancelling the share sheet is not an error
+            if ((error as Error)?.name !== 'AbortError') {
+                console.error(error);
+                alert('Could not create the file. Please try again.');
+            }
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const downloadImage = () =>
+        run(async () => {
+            saveFile(await capture(), `${fileName}.png`);
+        });
+
+    const downloadPdf = () =>
+        run(async () => {
+            const image = await capture();
+            const pdf = new jsPDF({
+                unit: 'mm',
+                format: 'a5',
+                orientation: 'portrait',
+            });
+            pdf.addImage(image, 'PNG', 0, 0, 148, 210);
+            pdf.save(`${fileName}.pdf`);
+        });
+
+    // Opens the phone share sheet (Telegram, WhatsApp, Messenger, ...)
+    const shareInvoice = () =>
+        run(async () => {
+            const blob = await (await fetch(await capture())).blob();
+            const file = new File([blob], `${fileName}.png`, {
+                type: 'image/png',
+            });
+
+            if (navigator.canShare?.({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: `Invoice ${invoice.invoice_id}`,
+                });
+            } else {
+                alert(
+                    'Sharing is not supported on this device. Please use Download Image or Download PDF.',
+                );
+            }
+        });
+
+    const cell = 'border px-1 align-middle';
+    const border = { borderColor: INK };
 
     return (
         <>
             <Head title={`Invoice ${invoice.invoice_id}`} />
 
+            {/* Force A5 portrait, no browser margins */}
             <style>{`
                 @page { size: A5 portrait; margin: 0; }
                 @media print {
-                    html, body { margin: 0; background: #fff; }
+                    html, body { width: 148mm; height: 210mm; margin: 0; }
                     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                 }
             `}</style>
 
+            {/* Screen: grey background. Print: cover the app layout (sidebar etc.) */}
             <div className="min-h-screen bg-gray-100 p-6 print:fixed print:inset-0 print:z-50 print:min-h-0 print:bg-white print:p-0">
-                {/* Controls (screen only) */}
-                <div className="mx-auto mb-4 flex w-[148mm] flex-wrap items-center justify-between gap-3 rounded-md bg-white p-3 text-sm shadow-sm print:hidden">
-                    <div className="flex items-center gap-3">
-                        <label className="flex items-center gap-1">
-                            X (mm)
-                            <input
-                                type="number"
-                                step="0.5"
-                                value={offsetX}
-                                onChange={(e) =>
-                                    saveOffsets(Number(e.target.value), offsetY)
-                                }
-                                className="w-16 rounded border px-1 py-0.5"
-                            />
-                        </label>
-                        <label className="flex items-center gap-1">
-                            Y (mm)
-                            <input
-                                type="number"
-                                step="0.5"
-                                value={offsetY}
-                                onChange={(e) =>
-                                    saveOffsets(offsetX, Number(e.target.value))
-                                }
-                                className="w-16 rounded border px-1 py-0.5"
-                            />
-                        </label>
-                        <label className="flex items-center gap-1">
-                            <input
-                                type="checkbox"
-                                checked={showGuides}
-                                onChange={(e) => setShowGuides(e.target.checked)}
-                            />
-                            Show guides
-                        </label>
-                    </div>
-
+                <div className="mx-auto mb-4 flex w-[148mm] max-w-full flex-wrap justify-end gap-2 print:hidden">
+                    <button
+                        onClick={downloadPdf}
+                        disabled={busy}
+                        className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                        {busy ? 'Please wait...' : 'Download PDF (A5)'}
+                    </button>
+                    <button
+                        onClick={downloadImage}
+                        disabled={busy}
+                        className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                        Download Image
+                    </button>
+                    <button
+                        onClick={shareInvoice}
+                        disabled={busy}
+                        className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                        Share
+                    </button>
                     <button
                         onClick={() => window.print()}
-                        className="rounded-md bg-black px-4 py-2 font-medium text-white"
+                        disabled={busy}
+                        className="rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-800 disabled:opacity-50"
                     >
-                        Print on pad (A5)
+                        Print
                     </button>
                 </div>
 
-                {pages.map((rows, pageIndex) => {
-                    const isLastPage = pageIndex === pages.length - 1;
-
-                    return (
-                        <div
-                            key={pageIndex}
-                            className="relative mx-auto mb-6 h-[210mm] w-[148mm] overflow-hidden bg-white shadow-sm ring-1 ring-gray-300 print:mb-0 print:shadow-none print:ring-0"
-                            style={{
-                                breakAfter: isLastPage ? 'auto' : 'page',
-                                fontFamily:
-                                    "'Noto Sans Khmer', 'Khmer OS', Arial, sans-serif",
-                                color: '#000',
-                                fontSize: '9pt',
-                                lineHeight: 1.15,
-                            }}
-                        >
-                            {/* Everything inside is shifted by the calibration offset */}
-                            <div
-                                className="absolute inset-0"
-                                style={{
-                                    transform: `translate(${offsetX}mm, ${offsetY}mm)`,
-                                }}
-                            >
-                                {/* System invoice ID, below the pad's serial number */}
-                                <div
-                                    className={guide}
-                                    style={place(HEADER.invoiceId, {
-                                        textAlign: 'right',
-                                        fontSize: '8pt',
-                                        fontWeight: 600,
-                                    })}
-                                >
-                                    {invoice.invoice_id}
-                                </div>
-
-                                {/* Patient info */}
-                                <div
-                                    className={`font-semibold ${guide}`}
-                                    style={place(HEADER.name)}
-                                >
-                                    {patient.name}
-                                </div>
-                                <div className={guide} style={place(HEADER.sex)}>
-                                    {patient.sex ?? ''}
-                                </div>
-                                <div className={guide} style={place(HEADER.age)}>
-                                    {patient.age ?? ''}
-                                </div>
-                                <div className={guide} style={place(HEADER.tel)}>
-                                    {patient.phone ?? ''}
-                                </div>
-                                <div className={guide} style={place(HEADER.day)}>
-                                    {day}
-                                </div>
-                                <div className={guide} style={place(HEADER.month)}>
-                                    {month}
-                                </div>
-                                <div className={guide} style={place(HEADER.year)}>
-                                    {year}
-                                </div>
-
-                                {/* Treatment rows */}
-                                {rows.map((item, index) => {
-                                    const top = FIRST_ROW_TOP + index * ROW_PITCH;
-                                    const rowBase = { top, height: ROW_HEIGHT };
-
-                                    return (
-                                        <div key={item.id}>
-                                            <div
-                                                className={`overflow-hidden ${guide}`}
-                                                style={place(
-                                                    { ...COL.desc, ...rowBase },
-                                                    {
-                                                        height: `${ROW_HEIGHT}mm`,
-                                                        whiteSpace: 'normal',
-                                                        fontSize: '8pt',
-                                                        lineHeight: 1.1,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                    },
-                                                )}
-                                            >
-                                                <span>
-                                                    {item.description ||
-                                                        item.treatment_service?.name}
-                                                    {item.tooth_number
-                                                        ? ` (#${item.tooth_number})`
-                                                        : ''}
-                                                </span>
-                                            </div>
-
-                                            <div
-                                                className={guide}
-                                                style={place(
-                                                    { ...COL.qty, ...rowBase },
-                                                    { textAlign: 'center', paddingTop: '1.5mm' },
-                                                )}
-                                            >
-                                                {item.quantity}
-                                            </div>
-
-                                            <div
-                                                className={guide}
-                                                style={place(
-                                                    { ...COL.price, ...rowBase },
-                                                    { textAlign: 'right', paddingTop: '1.5mm', paddingRight: '1mm' },
-                                                )}
-                                            >
-                                                {money(item.unit_price)}
-                                            </div>
-
-                                            <div
-                                                className={guide}
-                                                style={place(
-                                                    { ...COL.appt, ...rowBase },
-                                                    { textAlign: 'center', paddingTop: '1.5mm', fontSize: '7.5pt' },
-                                                )}
-                                            >
-                                                {item.appointment_date
-                                                    ? formatDate(item.appointment_date)
-                                                    : ''}
-                                            </div>
-
-                                            <div
-                                                className={guide}
-                                                style={place(
-                                                    { ...COL.total, ...rowBase },
-                                                    { textAlign: 'right', paddingTop: '1.5mm', paddingRight: '1mm' },
-                                                )}
-                                            >
-                                                {money(item.total_price)}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Note + totals only on the last sheet */}
-                                {isLastPage && (
-                                    <>
-                                        <div
-                                            className={guide}
-                                            style={place(SUMMARY.note, {
-                                                whiteSpace: 'normal',
-                                                fontSize: '8pt',
-                                            })}
-                                        >
-                                            {hasDiscount
-                                                ? `Discount: -$${money(invoice.discount)}`
-                                                : ''}
-                                        </div>
-
-                                        <div
-                                            className={`font-bold ${guide}`}
-                                            style={place(SUMMARY.total, { textAlign: 'right', paddingRight: '1mm' })}
-                                        >
-                                            {money(invoice.total_amount)}
-                                        </div>
-                                        <div
-                                            className={guide}
-                                            style={place(SUMMARY.deposit, { textAlign: 'right', paddingRight: '1mm' })}
-                                        >
-                                            {money(invoice.paid_amount)}
-                                        </div>
-                                        <div
-                                            className={`font-bold ${guide}`}
-                                            style={place(SUMMARY.balance, { textAlign: 'right', paddingRight: '1mm' })}
-                                        >
-                                            {money(invoice.balance_amount)}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                {/* A5 sheet: 148mm x 210mm */}
+                <div
+                    ref={sheetRef}
+                    className="relative mx-auto box-border flex h-[210mm] w-[148mm] flex-col overflow-hidden bg-white p-[7mm] text-[9pt] leading-tight shadow-sm print:shadow-none"
+                    style={{ color: INK }}
+                >
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <h1 className="text-[16pt] leading-none font-bold">
+                                Tansamai Dental Clinic
+                            </h1>
+                            <p className="mt-1 text-[9pt] font-semibold">
+                                Tel: 087 673 497 / 066 626 069
+                            </p>
                         </div>
-                    );
-                })}
+
+                        <p
+                            className="text-[13pt] font-bold"
+                            style={{ color: RED }}
+                        >
+                            N<sup>o</sup> {invoice.invoice_id}
+                        </p>
+                    </div>
+
+                    {/* Patient info */}
+                    <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[9pt]">
+                        <div className="col-span-2 flex gap-1">
+                            <span className="shrink-0">Name:</span>
+                            <span
+                                className="flex-1 border-b border-dotted px-1 font-semibold text-black"
+                                style={border}
+                            >
+                                {patient.name}
+                            </span>
+                        </div>
+
+                        <div className="flex gap-1">
+                            <span className="shrink-0">Sex:</span>
+                            <span
+                                className="flex-1 border-b border-dotted px-1 text-black"
+                                style={border}
+                            >
+                                {patient.sex ?? ''}
+                            </span>
+                        </div>
+                        <div className="flex gap-1">
+                            <span className="shrink-0">Age:</span>
+                            <span
+                                className="flex-1 border-b border-dotted px-1 text-black"
+                                style={border}
+                            >
+                                {patient.age ?? ''}
+                            </span>
+                        </div>
+
+                        <div className="flex gap-1">
+                            <span className="shrink-0">Tel:</span>
+                            <span
+                                className="flex-1 border-b border-dotted px-1 text-black"
+                                style={border}
+                            >
+                                {patient.phone ?? ''}
+                            </span>
+                        </div>
+                        <div className="flex gap-1">
+                            <span className="shrink-0">Date:</span>
+                            <span
+                                className="flex-1 border-b border-dotted px-1 text-black"
+                                style={border}
+                            >
+                                {formatDate(invoice.created_at)}
+                            </span>
+                        </div>
+
+                        <div className="col-span-2 flex gap-1 text-[8pt]">
+                            <span className="shrink-0">Patient ID:</span>
+                            <span className="text-black">
+                                {patient.patient_id}
+                            </span>
+                            <span className="ml-3 shrink-0">Dentist:</span>
+                            <span className="text-black">
+                                {invoice.treatment_case.dentist.name}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Treatment table */}
+                    <table
+                        className="mt-2 w-full table-fixed border-collapse border text-[8.5pt]"
+                        style={border}
+                    >
+                        <colgroup>
+                            <col style={{ width: '7%' }} />
+                            <col style={{ width: '38%' }} />
+                            <col style={{ width: '8%' }} />
+                            <col style={{ width: '14%' }} />
+                            <col style={{ width: '16%' }} />
+                            <col style={{ width: '17%' }} />
+                        </colgroup>
+                        <thead>
+                            <tr className="h-[6.5mm] text-center font-semibold">
+                                <th className={cell} style={border}>
+                                    No.
+                                </th>
+                                <th className={cell} style={border}>
+                                    Treatment Description
+                                </th>
+                                <th className={cell} style={border}>
+                                    Qty
+                                </th>
+                                <th className={cell} style={border}>
+                                    Price
+                                </th>
+                                <th className={cell} style={border}>
+                                    Appointment
+                                </th>
+                                <th className={cell} style={border}>
+                                    Total
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody className="text-black">
+                            {items.map((item, index) => (
+                                <tr key={item.id} className="h-[8.2mm]">
+                                    <td
+                                        className={`${cell} text-center`}
+                                        style={{ ...border, color: INK }}
+                                    >
+                                        {index + 1}
+                                    </td>
+                                    <td
+                                        className={`${cell} overflow-hidden`}
+                                        style={border}
+                                    >
+                                        {item.description ||
+                                            item.treatment_service?.name}
+                                        {item.tooth_number && (
+                                            <span className="text-gray-600">
+                                                {' '}
+                                                (#{item.tooth_number})
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td
+                                        className={`${cell} text-center`}
+                                        style={border}
+                                    >
+                                        {item.quantity}
+                                    </td>
+                                    <td
+                                        className={`${cell} text-right`}
+                                        style={border}
+                                    >
+                                        ${money(item.unit_price)}
+                                    </td>
+                                    <td
+                                        className={`${cell} text-center text-[7.5pt]`}
+                                        style={border}
+                                    >
+                                        {item.appointment_date
+                                            ? formatDate(item.appointment_date)
+                                            : ''}
+                                    </td>
+                                    <td
+                                        className={`${cell} text-right`}
+                                        style={border}
+                                    >
+                                        ${money(item.total_price)}
+                                    </td>
+                                </tr>
+                            ))}
+
+                            {/* Empty numbered rows, like the printed pad */}
+                            {Array.from({ length: emptyRows }).map((_, i) => (
+                                <tr key={`empty-${i}`} className="h-[8.2mm]">
+                                    <td
+                                        className={`${cell} text-center`}
+                                        style={{ ...border, color: INK }}
+                                    >
+                                        {items.length + i + 1}
+                                    </td>
+                                    <td className={cell} style={border} />
+                                    <td className={cell} style={border} />
+                                    <td className={cell} style={border} />
+                                    <td className={cell} style={border} />
+                                    <td className={cell} style={border} />
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {/* Notes + totals */}
+                    <div className="mt-1 flex flex-1 gap-2">
+                        <div
+                            className="flex-1 border p-1 text-[8.5pt]"
+                            style={border}
+                        >
+                            <p className="font-semibold">Note:</p>
+                            {hasDiscount && (
+                                <p className="text-black">
+                                    Discount: -${money(invoice.discount)}
+                                </p>
+                            )}
+                        </div>
+
+                        <table
+                            className="w-[55mm] border-collapse border text-[8.5pt]"
+                            style={border}
+                        >
+                            <tbody className="h-full">
+                                <tr>
+                                    <td
+                                        className={`${cell} text-right`}
+                                        style={border}
+                                    >
+                                        Total
+                                    </td>
+                                    <td
+                                        className={`${cell} w-[22mm] text-right font-bold text-black`}
+                                        style={border}
+                                    >
+                                        ${money(invoice.total_amount)}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        className={`${cell} text-right`}
+                                        style={border}
+                                    >
+                                        Deposit
+                                    </td>
+                                    <td
+                                        className={`${cell} text-right text-black`}
+                                        style={border}
+                                    >
+                                        ${money(invoice.paid_amount)}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        className={`${cell} text-right`}
+                                        style={border}
+                                    >
+                                        Balance
+                                    </td>
+                                    <td
+                                        className={`${cell} text-right font-bold text-black`}
+                                        style={border}
+                                    >
+                                        ${money(invoice.balance_amount)}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Footer */}
+                    <p className="mt-1 text-center text-[8pt] font-semibold">
+                        Address: No. 10, Phnom Penh, Cambodia
+                    </p>
+                </div>
             </div>
         </>
     );
