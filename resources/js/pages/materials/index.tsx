@@ -1,30 +1,41 @@
 import { Head, Link } from '@inertiajs/react';
-import { Package, PlusCircle, Boxes, Tags, ArrowRight } from 'lucide-react';
+import {
+    Package,
+    PlusCircle,
+    Boxes,
+    Tags,
+    ArrowRight,
+    Truck,
+} from 'lucide-react';
+import materials from '@/routes/materials';
+import stock from '@/routes/stock';
+import purchases from '@/routes/purchases';
 
 const materialActions = [
     {
         title: 'View Materials',
         description: 'View and manage all clinic materials.',
         icon: Package,
-        href: '/materials',
+        href: materials.list(),
     },
     {
-        title: 'Add Material',
-        description: 'Register new materials into the system.',
-        icon: PlusCircle,
-        href: '/materials/create',
+        title: 'Purchase Material',
+        description: 'Make an purchase sheet for order materials.',
+        icon: Truck,
+        href: purchases.index().url, // replace with purchases.index() once that route exists
     },
+
     {
         title: 'Stock Management',
         description: 'Monitor and update material stock quantities.',
         icon: Boxes,
-        href: '/materials/stock',
+        href: stock.index().url, // replace with stock.index() once that route exists
     },
     {
         title: 'Material Categories',
         description: 'Organize and manage material categories.',
         icon: Tags,
-        href: '/materials/categories',
+        href: '/materials/categories', // replace with materialCategories.index() later
     },
 ];
 

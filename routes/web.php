@@ -6,7 +6,12 @@ use App\Http\Controllers\Dentists\DentistController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Invoice\PaymentController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Material\MaterialCategoryController;
+use App\Http\Controllers\Material\MaterialController;
+use App\Http\Controllers\Material\PurchaseController;
+use App\Http\Controllers\Material\SupplierController;
 use App\Http\Controllers\Patients\PatientController;
+use App\Http\Controllers\Stock\StockController;
 use App\Http\Controllers\TreatmentCase\TreatmentCaseController;
 use App\Http\Controllers\TreatmentCase\TreatmentCaseItemController;
 use App\Http\Controllers\Treatments\TreatmentController;
@@ -48,9 +53,54 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
     Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
-    Route::inertia('/materials', 'materials/index')->name('materials.index');
+
+
+    Route::get('materials', [MaterialController::class, 'index'])->name('materials.index');   // your hub page
+    Route::get('materials/all', [MaterialController::class, 'list'])->name('materials.list');
+    Route::get('materials/{material}', [MaterialController::class, 'show'])
+        ->whereNumber('material')
+        ->name('materials.show');
+    Route::resource('materials', MaterialController::class)->except(['index', 'show']);
+
+
+
+    Route::resource('materials/categories', MaterialCategoryController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['categories' => 'category'])
+        ->names('material-categories');
+
     Route::inertia('/loans', 'loans/index')->name('loans.index');
     Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('stock')->name('stock.')->group(function () {
+    Route::get('/', [StockController::class, 'index'])->name('index');
+
+    Route::get('in', [StockController::class, 'showIn'])->name('in');
+    Route::post('in', [StockController::class, 'storeIn'])->name('receive');
+
+    Route::get('out', [StockController::class, 'showOut'])->name('out');
+    Route::post('out', [StockController::class, 'storeOut'])->name('issue');
+
+    Route::get('adjustments', [StockController::class, 'showAdjustments'])->name('adjustments');
+    Route::post('adjustments', [StockController::class, 'storeAdjustment'])->name('adjust');
+    Route::get('history', [StockController::class, 'history'])->name('history');
+    Route::get('expiry', [StockController::class, 'expiry'])->name('expiry');
+    Route::get('low', [StockController::class, 'low'])->name('low');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('purchases')->name('purchases.')->group(function () {
+        Route::get('{purchase}/print', [PurchaseController::class, 'print'])->name('print');
+        Route::get('/', [PurchaseController::class, 'index'])->name('index');
+        Route::get('create', [PurchaseController::class, 'create'])->name('create');
+        Route::post('/', [PurchaseController::class, 'store'])->name('store');
+        Route::get('{purchase}', [PurchaseController::class, 'show'])->name('show');
+        Route::post('{purchase}/receive', [PurchaseController::class, 'receive'])->name('receive');
+        Route::post('{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('cancel');
+    });
+
+    Route::post('suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
 });
 
 

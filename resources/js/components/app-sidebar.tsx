@@ -10,6 +10,7 @@ import {
     Timer,
     User2,
     UserCircle2,
+    ChevronRight,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
