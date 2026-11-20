@@ -52,19 +52,33 @@ interface Line {
 interface Props {
     suppliers: { id: number; name: string }[];
     materials: MaterialOption[];
+    purchase?: {
+        id: number;
+        reference_no: string;
+        supplier_id: string;
+        purchase_date: string;
+        note: string;
+        items: Line[];
+    };
 }
 
-export default function PurchaseCreate({ suppliers, materials }: Props) {
+export default function PurchaseCreate({
+    suppliers,
+    materials,
+    purchase,
+}: Props) {
+    const isEdit = !!purchase;
     const form = useForm<{
         supplier_id: string;
         purchase_date: string;
         note: string;
         items: Line[];
     }>({
-        supplier_id: '',
-        purchase_date: new Date().toISOString().slice(0, 10),
-        note: '',
-        items: [],
+        supplier_id: purchase?.supplier_id ?? '',
+        purchase_date:
+            purchase?.purchase_date ?? new Date().toISOString().slice(0, 10),
+        note: purchase?.note ?? '',
+        items: purchase?.items ?? [],
     });
 
     const [code, setCode] = useState('');
@@ -133,7 +147,11 @@ export default function PurchaseCreate({ suppliers, materials }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        form.post(purchases.store().url);
+        if (purchase) {
+            form.put(purchases.update(purchase.id).url);
+        } else {
+            form.post(purchases.store().url);
+        }
     };
 
     const saveSupplier = (e: React.FormEvent) => {
@@ -154,7 +172,9 @@ export default function PurchaseCreate({ suppliers, materials }: Props) {
             <form onSubmit={submit} className="flex flex-col gap-4 p-4">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight">
-                        New Purchase
+                        {isEdit
+                            ? `Edit ${purchase!.reference_no}`
+                            : 'New Purchase'}
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Items are added by SKU from your materials list. New
@@ -438,7 +458,15 @@ export default function PurchaseCreate({ suppliers, materials }: Props) {
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" asChild>
-                            <Link href={purchases.index()}>Cancel</Link>
+                            <Link
+                                href={
+                                    isEdit
+                                        ? purchases.show(purchase!.id)
+                                        : purchases.index()
+                                }
+                            >
+                                Cancel
+                            </Link>
                         </Button>
                         <Button
                             type="submit"
@@ -446,7 +474,7 @@ export default function PurchaseCreate({ suppliers, materials }: Props) {
                                 form.processing || form.data.items.length === 0
                             }
                         >
-                            Save purchase
+                            {isEdit ? 'Save changes' : 'Save purchase'}
                         </Button>
                     </div>
                 </div>

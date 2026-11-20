@@ -64,8 +64,7 @@ class PurchaseController extends Controller
 
         return view('purchases.print', compact('purchase'));
     }
-
-    public function store(Request $request)
+    private function validated(Request $request): array
     {
         $data = $request->validate([
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
@@ -81,40 +80,42 @@ class PurchaseController extends Controller
             'items.*.material_id.distinct' => 'This material is listed twice. Keep one line per material.',
         ]);
 
-        // Materials that track expiry must have an expiry date
-        $materials = Material::whereIn('id', collect($data['items'])->pluck('material_id'))
-            ->get()->keyBy('id');
+        $materials = Material::whereIn('id', collect($data['items'])->pluck('material_id'))->get()->keyBy('id');
 
         $errors = [];
         foreach ($data['items'] as $i => $item) {
-            $m = $materials[$item['material_id']];
-            if (! $m->is_active) {
-                $errors["items.$i.material_id"] = "{$m->name} is inactive.";
+            if (! $materials[$item['material_id']]->is_active) {
+                $errors["items.$i.material_id"] = "{$materials[$item['material_id']]->name} is inactive.";
             }
         }
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
 
-        $purchase = DB::transaction(function () use ($data) {
-            $total = 0;
-            $lines = [];
+        return $data;
+    }
 
-            foreach ($data['items'] as $item) {
-                $subtotal = round($item['quantity'] * $item['unit_cost'], 2);
-                $total += $subtotal;
-                $lines[] = [
-                    'material_id' => $item['material_id'],
-                    'batch_no' => $item['batch_no'] ?? null,
-                    'expiry_date' => $item['expiry_date'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_cost' => $item['unit_cost'],
-                    'subtotal' => $subtotal,
-                ];
-            }
+    private function lines(array $items): array
+    {
+        return collect($items)->map(fn($item) => [
+            'material_id' => $item['material_id'],
+            'batch_no' => $item['batch_no'] ?? null,
+            'expiry_date' => $item['expiry_date'] ?? null,
+            'quantity' => $item['quantity'],
+            'unit_cost' => $item['unit_cost'],
+            'subtotal' => round($item['quantity'] * $item['unit_cost'], 2),
+        ])->all();
+    }
 
+    public function store(Request $request)
+    {
+        $data = $this->validated($request);   // validation + inactive check
+        $lines = $this->lines($data['items']);
+        $total = collect($lines)->sum('subtotal');
+
+        $purchase = DB::transaction(function () use ($data, $lines, $total) {
             $purchase = Purchase::create([
-                'reference_no' => 'PO-' . now()->format('ymd') . '-' . str_pad((string) (Purchase::count() + 1), 4, '0', STR_PAD_LEFT),
+                'reference_no' => 'PO-' . now()->format('ymd') . '-' . str_pad((string) ((Purchase::max('id') ?? 0) + 1), 4, '0', STR_PAD_LEFT),
                 'supplier_id' => $data['supplier_id'] ?? null,
                 'purchase_date' => $data['purchase_date'],
                 'total_amount' => $total,
@@ -129,6 +130,72 @@ class PurchaseController extends Controller
         });
 
         return to_route('purchases.show', $purchase)->with('success', 'Purchase created.');
+    }
+    public function edit(Purchase $purchase)
+    {
+        if ($purchase->status !== PurchaseStatus::Draft) {
+            return to_route('purchases.show', $purchase)
+                ->withErrors(['status' => 'Only draft purchases can be edited.']);
+        }
+
+        $purchase->load('items.material:id,sku,name,unit,track_expiry');
+
+        return Inertia::render('purchases/create', [
+            'suppliers' => Supplier::orderBy('name')->get(['id', 'name']),
+            'materials' => Material::active()->orderBy('name')
+                ->get(['id', 'sku', 'name', 'unit', 'unit_cost', 'track_expiry'])
+                ->map(fn($m) => [
+                    'id' => $m->id,
+                    'sku' => $m->sku,
+                    'name' => $m->name,
+                    'unit' => $m->unit,
+                    'unit_cost' => (float) $m->unit_cost,
+                    'track_expiry' => $m->track_expiry,
+                ]),
+            'purchase' => [
+                'id' => $purchase->id,
+                'reference_no' => $purchase->reference_no,
+                'supplier_id' => $purchase->supplier_id ? (string) $purchase->supplier_id : '',
+                'purchase_date' => $purchase->purchase_date->toDateString(),
+                'note' => $purchase->note ?? '',
+                'items' => $purchase->items->map(fn($i) => [
+                    'material_id' => $i->material_id,
+                    'sku' => $i->material->sku,
+                    'name' => $i->material->name,
+                    'unit' => $i->material->unit,
+                    'track_expiry' => $i->material->track_expiry,
+                    'quantity' => (string) (float) $i->quantity,
+                    'unit_cost' => (string) (float) $i->unit_cost,
+                    'batch_no' => $i->batch_no ?? '',
+                    'expiry_date' => $i->expiry_date?->toDateString() ?? '',
+                ])->values(),
+            ],
+        ]);
+    }
+
+    public function update(Request $request, Purchase $purchase)
+    {
+        if ($purchase->status !== PurchaseStatus::Draft) {
+            return back()->withErrors(['status' => 'Only draft purchases can be edited.']);
+        }
+
+        $data = $this->validated($request);
+        $lines = $this->lines($data['items']);
+
+        DB::transaction(function () use ($purchase, $data, $lines) {
+            $purchase->update([
+                'supplier_id' => $data['supplier_id'] ?? null,
+                'purchase_date' => $data['purchase_date'],
+                'note' => $data['note'] ?? null,
+                'total_amount' => collect($lines)->sum('subtotal'),
+            ]);
+
+            // Draft items have no batches yet, so replacing them is safe
+            $purchase->items()->delete();
+            $purchase->items()->createMany($lines);
+        });
+
+        return to_route('purchases.show', $purchase)->with('success', 'Purchase updated.');
     }
 
     public function show(Purchase $purchase): Response

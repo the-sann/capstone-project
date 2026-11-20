@@ -94,6 +94,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('{purchase}/print', [PurchaseController::class, 'print'])->name('print');
         Route::get('/', [PurchaseController::class, 'index'])->name('index');
         Route::get('create', [PurchaseController::class, 'create'])->name('create');
+        Route::get('{purchase}/edit', [PurchaseController::class, 'edit'])->name('edit');
+        Route::put('{purchase}', [PurchaseController::class, 'update'])->name('update');
         Route::post('/', [PurchaseController::class, 'store'])->name('store');
         Route::get('{purchase}', [PurchaseController::class, 'show'])->name('show');
         Route::post('{purchase}/receive', [PurchaseController::class, 'receive'])->name('receive');

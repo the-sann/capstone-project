@@ -12,7 +12,7 @@ import {
 import purchases from '@/routes/purchases';
 import { useForm } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
-import { Printer } from 'lucide-react';
+import { Pencil, Printer } from 'lucide-react';
 
 interface Item {
     id: number;
@@ -102,6 +102,11 @@ export default function PurchaseShow({ purchase: p }: Props) {
                                 <Button variant="outline" onClick={cancel}>
                                     Cancel purchase
                                 </Button>
+                                <Button variant="outline" asChild>
+                                    <Link href={purchases.edit(p.id)}>
+                                        <Pencil className="mr-1 size-4" /> Edit
+                                    </Link>
+                                </Button>
                                 <Button onClick={receive}>Receive stock</Button>
                             </>
                         )}
@@ -130,8 +135,9 @@ export default function PurchaseShow({ purchase: p }: Props) {
                 )}
                 {p.status === 'draft' && (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                        Enter the batch number and expiry date from the
-                        delivery, then click Receive stock.
+                        Check the delivery: adjust quantity and cost if they
+                        differ from the order, enter the batch number and expiry
+                        date, then click Receive stock.
                     </div>
                 )}
 
