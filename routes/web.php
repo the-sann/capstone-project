@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Appointment\AppointmentController;
-use App\Http\Controllers\dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dentists\DentistController;
 use App\Http\Controllers\Invoice\InvoiceController;
 use App\Http\Controllers\Invoice\PaymentController;
